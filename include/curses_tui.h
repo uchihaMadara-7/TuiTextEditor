@@ -57,4 +57,4 @@ private:
     int m_width;
 };
 
-#endif
+#endif // __CURSES_TUI_H__

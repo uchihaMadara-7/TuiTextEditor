@@ -21,6 +21,7 @@ BUILD = build
 SOURCE_DIR = src
 SRC = src/text_editor.cpp
 SRC += src/curses_tui.cpp
+SRC += src/editor.cpp
 
 OBJS = $(patsubst $(SOURCE_DIR)/%.cpp, $(BUILD)/%.o, $(SRC))
 # $(info $(OBJS))
