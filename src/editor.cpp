@@ -52,9 +52,57 @@ void Editor::up_arrow() {
 }
 
 void Editor::backspace() {
+    charNode *temp_col = current_col;
+
+    /* At beginning of row, not pointing to any node */
+    if (!current_col) {
+        if (current_row->prev) {
+            lineNode *temp_row = current_row;
+            current_row = current_row->prev;
+            current_col = current_row->prev->tail;
+            delete temp_row;
+        }
+    }
+    /* Delete node at front */
+    else if (current_row->head == current_col) {
+        /* If node is only node in row */
+        if (current_row->tail == current_col) {
+            current_row->head = current_row->tail = nullptr;
+        }
+        /* Deleting front but row is not empty */
+        else {
+            current_row->head = current_col->next;
+            /* Safety check but shouldn't required if logic is correct */
+            if (current_col->next) current_col->next->prev = nullptr;
+        }
+        current_col = nullptr;
+        delete temp_col;
+        current_row->length -= 1;
+    }
+    /* Delete node in between */
+    else if (current_col->prev && current_col->next) {
+        current_col->prev->next = current_col->next;
+        current_col->next->prev = current_col->prev;
+        current_col = current_col->prev;
+        delete temp_col;
+        current_row->length -= 1;
+    }
+    /* Delete last node in row (min of 2 nodes) */
+    else if (!current_col->next) {
+        current_col->prev->next = nullptr;
+        current_row->tail = current_col->prev;
+        current_col = current_col->prev;
+        delete temp_col;
+        current_row->length -= 1;
+    }
+    /* Shouldn't be possible, if yes, check the logic */
+    else {
+        assert(0);
+    }
+
     if (window.get_cursor_x() == 0) {
         if (window.get_cursor_y() > EDITOR_START_Y)
-            window.move(window.get_cursor_y()-1, 0);
+            window.move(window.get_cursor_y()-1, current_row->length);
     }
     else {
         window.print(window.get_cursor_y(), window.get_cursor_x()-1, ' ');
@@ -116,6 +164,8 @@ void Editor::all() {
             window.print(current_col->value);
             current_col = current_col->next;
         }
+        window.print(" (%d)", current_row->length);
+        window.movey(window.get_cursor_y()-1);
         current_row = current_row->next;
     }
 }
