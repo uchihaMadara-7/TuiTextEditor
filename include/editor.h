@@ -3,6 +3,7 @@
 
 #include "curses_tui.h"
 
+#define SPACE ' '
 #define EDITOR_START_Y 1
 #define EDITOR_START_X 0
 
@@ -65,6 +66,7 @@ public:
 
 private:
     CursesWindow window;
+    lineNode *document = nullptr;
     lineNode *current_row = nullptr;
     charNode *current_col = nullptr;
 };

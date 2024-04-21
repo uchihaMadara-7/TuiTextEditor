@@ -7,6 +7,7 @@ Editor::Editor() {
 
 Editor::~Editor() {
     /* Free memory allocated */
+    current_row = document;
     while (current_row) {
         current_col = current_row->head;
         while (current_col) {
@@ -21,7 +22,8 @@ Editor::~Editor() {
 }
 
 void Editor::init() {
-    current_row = new lineNode();
+    document = new lineNode();
+    current_row = document;
     window.cbreak();
     window.set_echo(false);
     window.cursor_mode(CURSOR_INVISIBLE_HIGH);
@@ -58,8 +60,10 @@ void Editor::backspace() {
     if (!current_col) {
         if (current_row->prev) {
             lineNode *temp_row = current_row;
+            current_row->prev->next = current_row->next;
+            if (current_row->next) current_row->next->prev = current_row->prev;
             current_row = current_row->prev;
-            current_col = current_row->prev->tail;
+            current_col = current_row->tail;
             delete temp_row;
         }
     }
@@ -105,12 +109,19 @@ void Editor::backspace() {
             window.move(window.get_cursor_y()-1, current_row->length);
     }
     else {
-        window.print(window.get_cursor_y(), window.get_cursor_x()-1, ' ');
+        window.print(window.get_cursor_y(), window.get_cursor_x()-1, SPACE);
         window.movex(window.get_cursor_x()-1);
     }
 }
 
 void Editor::enter_key() {
+    /* for creating newlines, check if new line inserted at beginning, middle or end */
+    /* Consider same case for delete/backspace as well */
+    lineNode *temp_row = new lineNode();
+    current_row->next = temp_row;
+    temp_row->prev = current_row;
+    current_row = temp_row;
+    current_col = nullptr;
     window.move(window.get_cursor_y()+1, EDITOR_START_X);
 }
 
@@ -158,6 +169,7 @@ void Editor::write(int c) {
 
 void Editor::all() {
     window.move(8, 0);
+    current_row = document;
     while (current_row) {
         current_col = current_row->head;
         while (current_col) {
@@ -165,7 +177,7 @@ void Editor::all() {
             current_col = current_col->next;
         }
         window.print(" (%d)", current_row->length);
-        window.movey(window.get_cursor_y()-1);
+        window.move(window.get_cursor_y()+1, 0);
         current_row = current_row->next;
     }
 }
