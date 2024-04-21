@@ -82,7 +82,7 @@ void CursesWindow::print(char c) {
     ::waddch(m_win, c);
 }
 
-void CursesWindow::print(char c, int y, int x) {
+void CursesWindow::print(int y, int x, char c) {
     mvwaddch(m_win, y, x, c);
 }
 
@@ -90,6 +90,6 @@ void CursesWindow::print(std::string msg) {
     ::waddstr(m_win, msg.c_str());
 }
 
-void CursesWindow::print(std::string msg, int y, int x) {
+void CursesWindow::print(int y, int x, std::string msg) {
     mvwaddstr(m_win, y, x, msg.c_str());
 }

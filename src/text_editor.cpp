@@ -39,5 +39,7 @@ int main() {
                 editor.write(c);
         }
     }
+    // editor.all();
+    // getch();
     return 0;
 }

@@ -6,6 +6,35 @@
 #define EDITOR_START_Y 1
 #define EDITOR_START_X 0
 
+struct charNode {
+    charNode *prev;
+    charNode *next;
+    int value;
+
+    charNode() {
+        prev = next = nullptr;
+    }
+
+    charNode(int value) {
+        prev = next = nullptr;
+        this->value = value;
+    }
+};
+
+struct lineNode {
+    lineNode *prev;
+    lineNode *next;
+    charNode *head;
+    charNode *tail;
+    int length;
+
+    lineNode() {
+        prev = next = nullptr;
+        head = tail = nullptr;
+        length = 0;
+    }
+};
+
 class Editor {
 public:
     Editor();
@@ -32,9 +61,12 @@ public:
     void enter_key();
 
     void write(int c);
+    void all();
 
 private:
     CursesWindow window;
+    lineNode *current_row = nullptr;
+    charNode *current_col = nullptr;
 };
 
 #endif // __EDITOR_H__

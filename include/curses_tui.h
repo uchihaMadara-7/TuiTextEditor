@@ -32,9 +32,9 @@ public:
     int get_cursor_x();
     int get_cursor_y();
     void print(char c);
-    void print(char c, int y, int x);
+    void print(int y, int x, char c);
     void print(std::string msg);
-    void print(std::string msg, int y, int x);
+    void print(int y, int x, std::string msg);
 
     template<typename T>
     static auto convert(const T& arg) {
