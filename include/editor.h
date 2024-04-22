@@ -2,39 +2,11 @@
 #define __EDITOR_H__
 
 #include "curses_tui.h"
+#include "doubly_list.h"
 
 #define SPACE ' '
 #define EDITOR_START_Y 1
 #define EDITOR_START_X 0
-
-struct charNode {
-    charNode *prev;
-    charNode *next;
-    int value;
-
-    charNode() {
-        prev = next = nullptr;
-    }
-
-    charNode(int value) {
-        prev = next = nullptr;
-        this->value = value;
-    }
-};
-
-struct lineNode {
-    lineNode *prev;
-    lineNode *next;
-    charNode *head;
-    charNode *tail;
-    int length;
-
-    lineNode() {
-        prev = next = nullptr;
-        head = tail = nullptr;
-        length = 0;
-    }
-};
 
 class Editor {
 public:
@@ -66,9 +38,7 @@ public:
 
 private:
     CursesWindow window;
-    lineNode *document = nullptr;
-    lineNode *current_row = nullptr;
-    charNode *current_col = nullptr;
+    DoublyList2D ds_db;
 };
 
 #endif // __EDITOR_H__
