@@ -2,7 +2,7 @@
 #define __CURSES_TUI_H__
 
 #include <ncurses.h>
-#include <sstream>
+#include <iostream>
 
 #define CURSOR_INVISIBLE 0
 #define CURSOR_VISIBLE_NORMAL 1
@@ -38,11 +38,8 @@ public:
 
     template<typename T>
     static auto convert(const T& arg) {
-        if constexpr(std::is_same_v<T, std::string>) {
-            return arg.c_str();
-        } else {
-            return arg;
-        }
+        if constexpr(std::is_same_v<T, std::string>) return arg.c_str();
+        else return arg;
     }
 
     template<typename... Args>

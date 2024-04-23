@@ -1,4 +1,9 @@
 #include "editor.h"
+#include "logger.h"
+
+#define ERROR_TRACE Logger::getInstance().error
+#define INFO_TRACE Logger::getInstance().info
+#define DEBUG_TRACE Logger::getInstance().debug
 
 Editor::Editor() {
     init();
@@ -59,17 +64,17 @@ void Editor::write(int c) {
     window.print(c);
 }
 
-void Editor::all() {
-    window.move(8, 0);
+void Editor::_log_ds() {
+
     lineNode *current_row = ds_db.get_first_row();
     while (current_row) {
         charNode *current_col = current_row->head;
+        std::string row_str = "";
         while (current_col) {
-            window.print(current_col->value);
+            row_str.append(1, current_col->value);
             current_col = current_col->next;
         }
-        window.print(" (%d)", current_row->length);
-        window.move(window.get_cursor_y()+1, 0);
+        DEBUG_TRACE("%s (%d)", row_str, current_row->length);
         current_row = current_row->next;
     }
 }

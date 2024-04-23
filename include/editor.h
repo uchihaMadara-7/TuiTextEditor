@@ -8,6 +8,8 @@
 #define EDITOR_START_Y 1
 #define EDITOR_START_X 0
 
+#define LOG_DS Editor::getInstance()._log_ds
+
 class Editor {
 public:
     Editor();
@@ -34,7 +36,7 @@ public:
     void enter_key();
 
     void write(int c);
-    void all();
+    void _log_ds();
 
 private:
     CursesWindow window;

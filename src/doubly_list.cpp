@@ -25,15 +25,39 @@ DoublyList2D::~DoublyList2D() {
 void DoublyList2D::insert_row() {
     /* for creating newlines, check if new line inserted at beginning, middle or end */
     /* Consider same case for delete/backspace as well */
-    lineNode *temp_row = new lineNode();
-    current_row->next = temp_row;
-    temp_row->prev = current_row;
-    current_row = temp_row;
-    current_col = nullptr;
+    // if ()
+    /* Inserting row at the end */
+    if (!current_row->next) {
+        lineNode *temp_row = new lineNode();
+        current_row->next = temp_row;
+        temp_row->prev = current_row;
+        current_row = temp_row;
+        current_col = nullptr;
+    }
 }
 
 void DoublyList2D::delete_row() {
+    lineNode *temp_row = current_row;
 
+    /* First row, can't delete first row */
+    if (current_row == document) {
+        /* Do nothing - or do later */
+    }
+    /* Deleting row in between and last */
+    else if (current_row->prev) {
+        current_row->prev->next = current_row->next;
+        /* This logic only works for delete in between */
+        if (current_row->next) {
+            current_row->next->prev = current_row->prev;
+        }
+        current_row = current_row->prev;
+        current_col = current_row->tail;
+        delete temp_row;
+    }
+    /* Shouldn't be possible, if yes, check the logic */
+    else {
+        assert(0);
+    }
 }
 
 void DoublyList2D::insert_col(int x) {
@@ -80,14 +104,7 @@ void DoublyList2D::delete_col() {
 
     /* At beginning of row, not pointing to any node */
     if (!current_col) {
-        if (current_row->prev) {
-            lineNode *temp_row = current_row;
-            current_row->prev->next = current_row->next;
-            if (current_row->next) current_row->next->prev = current_row->prev;
-            current_row = current_row->prev;
-            current_col = current_row->tail;
-            delete temp_row;
-        }
+        delete_row();
     }
     /* Delete node at front */
     else if (current_row->head == current_col) {

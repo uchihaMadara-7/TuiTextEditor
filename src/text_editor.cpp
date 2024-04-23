@@ -1,7 +1,18 @@
 #include <iostream>
 #include "editor.h"
+#include "logger.h"
+
+#define LOG_FILE "editor.log"
 
 int main() {
+
+    /* Setting up logger */
+    Logger &logger = Logger::getInstance(LOG_FILE);
+    if (!logger.is_initialized()) {
+        /* Early return due to init failure */
+        return 1;
+    }
+    logger.set_level(LOG_DEBUG);
 
     Editor& editor = Editor::getInstance();
     while (int c = getch()) {
@@ -39,7 +50,6 @@ int main() {
                 editor.write(c);
         }
     }
-    // editor.all();
-    // getch();
+    LOG_DS();
     return 0;
 }

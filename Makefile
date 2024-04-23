@@ -17,12 +17,14 @@ LDFLAGS = -lncurses
 MACROS = -DLINUX
 
 BUILD = build
+LOG_FILE = editor.log
 
 SOURCE_DIR = src
 SRC = src/text_editor.cpp
 SRC += src/curses_tui.cpp
 SRC += src/editor.cpp
 SRC += src/doubly_list.cpp
+SRC += src/logger.cpp
 
 OBJS = $(patsubst $(SOURCE_DIR)/%.cpp, $(BUILD)/%.o, $(SRC))
 # $(info $(OBJS))
@@ -42,5 +44,6 @@ $(BUILD):
 
 clean:
 	rm -rf $(BUILD)
+	rm -rf $(LOG_FILE)
 
 .PHONY: all clean
