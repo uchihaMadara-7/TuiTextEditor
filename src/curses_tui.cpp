@@ -45,6 +45,10 @@ void CursesWindow::cursor_mode(int mode) {
     ::curs_set(mode);
 }
 
+void CursesWindow::clear() {
+    ::wclear(m_win);
+}
+
 void CursesWindow::move(int y, int x) {
     ::wmove(m_win, y, x);
 }

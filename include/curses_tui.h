@@ -23,6 +23,7 @@ public:
     void cbreak();
     void set_echo(bool flag);
     void cursor_mode(int mode);
+    void clear();
     void move(int y, int x);
     void movex(int x);
     void movey(int y);

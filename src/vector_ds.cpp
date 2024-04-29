@@ -2,27 +2,35 @@
 
 void VectorDS::insert_row(int row, int col) {
     int remaining = m_meta_data[row] - col;
-    DEBUG_TRACE("New line at (%d, %d): %d", row, col, remaining);
+    DEBUG_TRACE("Insert line at (%d, %d): %d", row, col, remaining);
     m_meta_data[row] = col;
     insert(m_meta_data, row+1, remaining);
 }
 
-void VectorDS::delete_row() {
-
+void VectorDS::delete_row(int row) {
+    int remaining = m_meta_data[row];
+    DEBUG_TRACE("Delete line at (%d, 0): %d", row, remaining);
+    m_meta_data[row-1] += remaining;
+    remove(m_meta_data, row);
 }
 
 void VectorDS::insert_col(int row, int col, int value) {
-    /* Maintaing characters per row - meta data */
-    if (m_meta_data.size() > (size_t)row) m_meta_data[row] += 1;
-    else m_meta_data.push_back(1);
-
     int position = get_position(row, col);
     DEBUG_TRACE("Insert at %d: %c (%d, %d)", position, value, row, col);
     insert(m_container, position, value);
+
+    /* Maintaing characters per row - meta data */
+    if (m_meta_data.size() > (size_t)row) m_meta_data[row] += 1;
+    else m_meta_data.push_back(1);
 }
 
-void VectorDS::delete_col() {
+void VectorDS::delete_col(int row, int col) {
+    int position = get_position(row, col);
+    DEBUG_TRACE("Delete at %d: %c (%d, %d)", position, m_container[position], row, col);
+    remove(m_container, position);
 
+    if (m_meta_data[row]) m_meta_data[row] -= 1;
+    else remove(m_meta_data, row);
 }
 
 int VectorDS::get_position(int row, int col) {

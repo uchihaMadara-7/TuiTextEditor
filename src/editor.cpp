@@ -68,7 +68,25 @@ void Editor::up_arrow() {
 }
 
 void Editor::backspace() {
+    int row = window.get_cursor_y();
+    int col = window.get_cursor_x();
 
+    /* If starting of line is reached, resetting to end of previous line */
+    if (col == EDITOR_START_COL) {
+        if (row > EDITOR_START_ROW) {
+            int length = ds_db.get_row_size(row-EDITOR_START_ROW-1);
+            ds_db.delete_row(row-EDITOR_START_ROW);
+            std::string document = ds_db.get_document();
+            re_render(document);
+            window.move(row-1, length);
+        }
+    }
+    else {
+        ds_db.delete_col(row - EDITOR_START_ROW, col - EDITOR_START_COL-1);
+        std::string document = ds_db.get_document();
+        re_render(document);
+        window.move(row, col-1);
+    }
 }
 
 void Editor::enter_key() {
@@ -83,6 +101,7 @@ void Editor::enter_key() {
 }
 
 void Editor::re_render(const std::string &text) {
+    window.clear();
     window.move(EDITOR_START_ROW, EDITOR_START_COL);
     for (int c : text) {
         window.print(c);

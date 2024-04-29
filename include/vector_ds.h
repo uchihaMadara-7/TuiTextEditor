@@ -9,12 +9,17 @@ static inline void insert(stl_type &stl, int position, int value) {
     stl.insert(stl.begin() + position, value);
 }
 
+template<typename stl_type>
+static inline void remove(stl_type &stl, int position) {
+    stl.erase(stl.begin() + position);
+}
+
 class VectorDS {
 public:
     void insert_row(int row, int col);
-    void delete_row();
+    void delete_row(int row);
     void insert_col(int row, int col, int value);
-    void delete_col();
+    void delete_col(int row, int col);
 
     int get_position(int row, int col);
     int get_row_size(int row);
