@@ -1,10 +1,6 @@
 #include "editor.h"
 #include "logger.h"
 
-#define ERROR_TRACE Logger::getInstance().error
-#define INFO_TRACE Logger::getInstance().info
-#define DEBUG_TRACE Logger::getInstance().debug
-
 Editor::Editor() {
     init();
 }
@@ -18,63 +14,88 @@ void Editor::init() {
     std::string heading = "[Text Editor]";
     int head_position = window.get_width()/2 - heading.size()/2;
     window.print(0, head_position, heading);
-    window.move(EDITOR_START_Y, EDITOR_START_X);
+    window.move(EDITOR_START_ROW, EDITOR_START_COL);
 }
 
 void Editor::left_arrow() {
-    if (window.get_cursor_x() == 0) {
-        if (window.get_cursor_y() > EDITOR_START_Y)
-            window.move(window.get_cursor_y()-1, window.get_width()-1);
+    int row = window.get_cursor_y();
+    int col = window.get_cursor_x();
+    /* If starting of line is reached, resetting to end of previous line */
+    if (col == EDITOR_START_COL) {
+        /* Cannot move past the first line */
+        if (row > EDITOR_START_ROW) {
+            int length = ds_db.get_row_size(row-EDITOR_START_ROW-1);
+            window.move(row-1, length);
+        }
     }
-    else window.movex(window.get_cursor_x()-1);
+    else window.movex(col-1);
 }
 
 void Editor::right_arrow() {
-    window.movex(window.get_cursor_x()+1);
+    int row = window.get_cursor_y();
+    int col = window.get_cursor_x();
+    int length = ds_db.get_row_size(row - EDITOR_START_ROW);
+    /* If end of line is reached, resetting to beginning of next line */
+    if (col == length) {
+        /* Cannot move past the last line */
+        if ((row - EDITOR_START_ROW + 1) < ds_db.get_total_rows()) {
+            window.move(row+1, EDITOR_START_COL);
+        }
+    }
+    else window.movex(col+1);
 }
 
 void Editor::down_arrow() {
-    window.movey(window.get_cursor_y()+1);
+    int row = window.get_cursor_y();
+    int col = window.get_cursor_x();
+
+    /* Can only move if it is not the last row */
+    if (row < ds_db.get_total_rows()) {
+        int length = ds_db.get_row_size(row - EDITOR_START_ROW + 1);
+        window.move(row+1, std::min(col, length));
+    }
 }
 
 void Editor::up_arrow() {
-    window.movey(window.get_cursor_y()-1);
+    int row = window.get_cursor_y();
+    int col = window.get_cursor_x();
+
+    /* Can only move if it is not the first row */
+    if (row > EDITOR_START_ROW) {
+        int length = ds_db.get_row_size(row - EDITOR_START_ROW - 1);
+        window.move(row-1, std::min(col, length));
+    }
 }
 
 void Editor::backspace() {
-    ds_db.delete_col();
-    int length = ds_db.get_row_size();
-    if (window.get_cursor_x() == 0) {
-        if (window.get_cursor_y() > EDITOR_START_Y)
-            window.move(window.get_cursor_y()-1, length);
-    }
-    else {
-        window.print(window.get_cursor_y(), window.get_cursor_x()-1, SPACE);
-        window.movex(window.get_cursor_x()-1);
-    }
+
 }
 
 void Editor::enter_key() {
-    ds_db.insert_row();
-    window.move(window.get_cursor_y()+1, EDITOR_START_X);
+    int row = window.get_cursor_y() - EDITOR_START_ROW;
+    int col = window.get_cursor_x() - EDITOR_START_COL;
+    ds_db.insert_row(row, col);
+
+    /* Re-render everything after this enter position */
+    std::string document = ds_db.get_document();
+    re_render(document);
+    window.move(EDITOR_START_ROW + row + 1, EDITOR_START_COL);
+}
+
+void Editor::re_render(const std::string &text) {
+    window.move(EDITOR_START_ROW, EDITOR_START_COL);
+    for (int c : text) {
+        window.print(c);
+    }
 }
 
 void Editor::write(int c) {
-    ds_db.insert_col(c);
+    int row = window.get_cursor_y() - EDITOR_START_ROW;
+    int col = window.get_cursor_x() - EDITOR_START_COL;
+    ds_db.insert_col(row, col, c);
     window.print(c);
 }
 
 void Editor::_log_ds() {
-
-    lineNode *current_row = ds_db.get_first_row();
-    while (current_row) {
-        charNode *current_col = current_row->head;
-        std::string row_str = "";
-        while (current_col) {
-            row_str.append(1, current_col->value);
-            current_col = current_col->next;
-        }
-        DEBUG_TRACE("%s (%d)", row_str, current_row->length);
-        current_row = current_row->next;
-    }
+    ds_db.printDS();
 }

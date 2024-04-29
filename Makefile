@@ -16,34 +16,35 @@ LDFLAGS = -lncurses
 
 MACROS = -DLINUX
 
-BUILD = build
+VECTOR_DS_BUILD = build_vec
 LOG_FILE = editor.log
 
 SOURCE_DIR = src
-SRC = src/text_editor.cpp
-SRC += src/curses_tui.cpp
-SRC += src/editor.cpp
-SRC += src/doubly_list.cpp
-SRC += src/logger.cpp
 
-OBJS = $(patsubst $(SOURCE_DIR)/%.cpp, $(BUILD)/%.o, $(SRC))
+VECTOR_DS_SRC = $(SOURCE_DIR)/text_editor.cpp
+VECTOR_DS_SRC += $(SOURCE_DIR)/curses_tui.cpp
+VECTOR_DS_SRC += $(SOURCE_DIR)/editor.cpp
+VECTOR_DS_SRC += $(SOURCE_DIR)/vector_ds.cpp
+VECTOR_DS_SRC += $(SOURCE_DIR)/logger.cpp
+
+OBJS = $(patsubst $(SOURCE_DIR)/%.cpp, $(VECTOR_DS_BUILD)/%.o, $(VECTOR_DS_SRC))
 # $(info $(OBJS))
 
-TARGET = $(BUILD)/text_editor
+VECTOR_DS_TARGET = $(VECTOR_DS_BUILD)/text_editor
 
-all: $(BUILD) $(TARGET)
+all: $(VECTOR_DS_BUILD) $(VECTOR_DS_TARGET)
 
-$(TARGET): $(OBJS)
-	$(CXX) $(LDFLAGS) $^ -o $(TARGET)
+$(VECTOR_DS_TARGET): $(OBJS)
+	$(CXX) $(LDFLAGS) $^ -o $(VECTOR_DS_TARGET)
 
-$(BUILD)/%.o: $(SOURCE_DIR)/%.cpp
+$(VECTOR_DS_BUILD)/%.o: $(SOURCE_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(MACROS) -c $< -o $@
 
-$(BUILD):
-	mkdir -p $(BUILD)
+$(VECTOR_DS_BUILD):
+	mkdir -p $(VECTOR_DS_BUILD)
 
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(VECTOR_DS_BUILD)
 	rm -rf $(LOG_FILE)
 
 .PHONY: all clean

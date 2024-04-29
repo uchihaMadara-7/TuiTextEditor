@@ -2,11 +2,23 @@
 #define __EDITOR_H__
 
 #include "curses_tui.h"
-#include "doubly_list.h"
+
+#ifdef DOUBLY_LIST_DS
+    #include "doubly_list.h"
+    #define DATA_STRUCTURE DoublyList2D
+
+/* SOME_OTHER_DS is placehold for some other DS */
+#elif defined(SOME_OTHER_DS)
+
+#else
+    #include "vector_ds.h"
+    #define DATA_STRUCTURE VectorDS
+
+#endif /* DOUBLY_LIST_DS and other directive checks */
 
 #define SPACE ' '
-#define EDITOR_START_Y 1
-#define EDITOR_START_X 0
+#define EDITOR_START_ROW 1
+#define EDITOR_START_COL 0
 
 #define LOG_DS Editor::getInstance()._log_ds
 
@@ -35,12 +47,14 @@ public:
     void backspace();
     void enter_key();
 
+    void re_render(const std::string &text);
+
     void write(int c);
     void _log_ds();
 
 private:
     CursesWindow window;
-    DoublyList2D ds_db;
+    DATA_STRUCTURE ds_db;
 };
 
 #endif // __EDITOR_H__

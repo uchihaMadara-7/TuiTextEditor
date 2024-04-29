@@ -8,6 +8,11 @@
 #define ERROR_STR "[ERROR]: "
 #define INFO_STR "[INFO]: "
 #define DEBUG_STR "[DEBUG]: "
+#define NEW_LINE '\n'
+
+#define ERROR_TRACE Logger::getInstance().error
+#define INFO_TRACE Logger::getInstance().info
+#define DEBUG_TRACE Logger::getInstance().debug
 
 enum LogLevel {
     LOG_ERROR,
@@ -58,7 +63,7 @@ public:
         }
         std::string meta = _get_level_str(c_level);
         format.insert(0, meta);
-        format.append(1, '\n');
+        format.append(1, NEW_LINE);
         if (m_log_file) {
             fprintf(m_log_file, format.c_str(), convert(args)...);
         }
