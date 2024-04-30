@@ -18,7 +18,8 @@
 #define KEY_ESC 27
 #define KEY_COMMAND 58
 #define KEY_SPACE 32
-#define KEY_INSERT 105
+#define KEY_INSERT_1 105
+#define KEY_INSERT_2 97
 
 class CursesWindow {
 public:

@@ -8,8 +8,8 @@ Editor::Editor() {
 Editor::~Editor() {}
 
 void Editor::init() {
-    m_window.create_window(LINES-EDITOR_END_ROW_OFFSET,
-        COLS-EDITOR_END_COL_OFFSET,
+    m_window.create_window(LINES - EDITOR_END_ROW_OFFSET,
+        COLS - EDITOR_END_COL_OFFSET,
         EDITOR_START_ROW, EDITOR_START_COL);
 
     m_window.cbreak();
@@ -18,12 +18,17 @@ void Editor::init() {
 
     /* Banner window - No updates during runtime */
     m_banner_win.create_window(1, COLS, 0, 0);
-    std::string heading = "[Text Editor]";
+    std::string heading = "[Tui Text Editor]";
     int head_position = m_window.get_width()/2 - heading.size()/2;
     m_banner_win.print(0, head_position, heading);
 
     /* Command window - Only updates in command mode */
     m_command_win.create_window(1, COLS, LINES-1, 0);
+
+    /* Line window */
+    m_line_win.create_window(LINES - EDITOR_END_ROW_OFFSET, 1,
+        EDITOR_START_ROW, 0);
+    set_line_placeholder();
 
     m_window.move(0, 0);
     set_mode(NORMAL_MODE);
@@ -71,7 +76,7 @@ void Editor::down_arrow() {
     int col = m_window.get_cursor_x();
 
     /* Can only move if it is not the last row */
-    if (row < m_ds_db.get_total_rows()) {
+    if (row < (m_ds_db.get_total_rows() - 1)) {
         int length = m_ds_db.get_row_size(row + 1);
         m_window.move(row+1, std::min(col, length));
     }
@@ -131,6 +136,13 @@ void Editor::re_render(const std::string &text) {
 void Editor::reset_cursor() {
     /* TODO: last known position instead of 0, 0 */
     m_window.move(0, 0);
+}
+
+void Editor::set_line_placeholder() {
+    int total_lines = m_line_win.get_height();
+    for (int i=0; i<total_lines; ++i) {
+        m_line_win.print('~');
+    }
 }
 
 int Editor::read() {

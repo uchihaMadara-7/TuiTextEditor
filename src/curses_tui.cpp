@@ -33,6 +33,7 @@ void CursesWindow::init() {
 
 void CursesWindow::create_window(int rows, int cols, int row_start, int col_start) {
     m_win = newwin(rows, cols, row_start, col_start);
+    ::keypad(m_win, TRUE);
     // box(m_win, '|', '-');
     // wrefresh(m_win);
     get_dimension(m_height, m_width);

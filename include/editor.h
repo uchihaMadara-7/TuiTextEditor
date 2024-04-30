@@ -18,14 +18,14 @@
 
 #define SPACE ' '
 #define EDITOR_START_ROW 1
-#define EDITOR_START_COL 0
+#define EDITOR_START_COL 2
 #define EDITOR_END_ROW_OFFSET 2
 #define EDITOR_END_COL_OFFSET 0
 
-#define NORMAL_MODE_STR "NORMAL MODE!"
-#define INSERT_MODE_STR "INSERT MODE ENTERED!"
-#define COMMAND_MODE_STR "COMMAND MODE ENTERED!"
-#define INVALID_COMMAND "INVALID COMMAND!"
+#define NORMAL_MODE_STR "---- NORMAL MODE ----"
+#define INSERT_MODE_STR "---- INSERT MODE ----"
+#define COMMAND_MODE_STR "---- COMMAND MODE ----"
+#define INVALID_COMMAND "---- INVALID COMMAND ----"
 
 #define LOG_DS Editor::getInstance()._log_ds
 
@@ -67,6 +67,7 @@ public:
 
     void re_render(const std::string &text);
     void reset_cursor();
+    void set_line_placeholder();
 
     int read();
     void write(int c);
@@ -81,7 +82,7 @@ public:
     void _log_ds();
 
 private:
-    CursesWindow m_window, m_banner_win, m_command_win;
+    CursesWindow m_window, m_banner_win, m_command_win, m_line_win;
     DATA_STRUCTURE m_ds_db;
     EditorMode m_mode;
 };

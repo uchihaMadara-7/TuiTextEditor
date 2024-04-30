@@ -94,7 +94,8 @@ int main() {
                     editor.command_mode_banner();
                 }
                 break;
-            case KEY_INSERT:
+            case KEY_INSERT_1:
+            case KEY_INSERT_2:
                 if (editor.get_mode() == NORMAL_MODE) {
                     DEBUG_TRACE("Insert mode activated!");
                     editor.set_mode(INSERT_MODE);
