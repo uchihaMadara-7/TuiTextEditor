@@ -5,8 +5,12 @@ bool CursesWindow::m_initialized = false;
 
 CursesWindow::CursesWindow() {
     init();
-    m_win = stdscr;
-    get_dimension(m_height, m_width);
+    // m_win = stdscr;
+    // DEBUG_TRACE("(%d, %d) (%d, %d)", rows, cols, starty, startx);
+    // m_win = newwin(rows, cols, starty, startx);
+    // box(m_win, '|', '-');
+    // wrefresh(m_win);
+    // get_dimension(m_height, m_width);
 }
 
 CursesWindow::~CursesWindow() {
@@ -17,6 +21,7 @@ CursesWindow::~CursesWindow() {
 
 void CursesWindow::init() {
     if (!m_initialized) {
+        DEBUG_TRACE("Initialised once!");
         /* Initialises the screen */
         ::initscr();
         /* Allow handling of control characters like arrow keys, enter, ... */
@@ -24,6 +29,13 @@ void CursesWindow::init() {
         ::refresh();
         m_initialized = true;
     }
+}
+
+void CursesWindow::create_window(int rows, int cols, int row_start, int col_start) {
+    m_win = newwin(rows, cols, row_start, col_start);
+    // box(m_win, '|', '-');
+    // wrefresh(m_win);
+    get_dimension(m_height, m_width);
 }
 
 void CursesWindow::cbreak() {
@@ -82,18 +94,26 @@ int CursesWindow::get_cursor_y() {
     return ::getcury(m_win);
 }
 
-void CursesWindow::print(char c) {
-    ::waddch(m_win, c);
+int CursesWindow::read() {
+    return ::wgetch(m_win);
 }
 
-void CursesWindow::print(int y, int x, char c) {
+void CursesWindow::print(int c) {
+    ::waddch(m_win, c);
+    ::wrefresh(m_win);
+}
+
+void CursesWindow::print(int y, int x, int c) {
     mvwaddch(m_win, y, x, c);
+    ::wrefresh(m_win);
 }
 
 void CursesWindow::print(std::string msg) {
     ::waddstr(m_win, msg.c_str());
+    ::wrefresh(m_win);
 }
 
 void CursesWindow::print(int y, int x, std::string msg) {
     mvwaddstr(m_win, y, x, msg.c_str());
+    ::wrefresh(m_win);
 }

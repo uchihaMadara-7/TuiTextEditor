@@ -8,154 +8,177 @@ Editor::Editor() {
 Editor::~Editor() {}
 
 void Editor::init() {
-    window.cbreak();
-    window.set_echo(false);
-    window.cursor_mode(CURSOR_INVISIBLE_HIGH);
+    m_window.create_window(LINES-EDITOR_END_ROW_OFFSET,
+        COLS-EDITOR_END_COL_OFFSET,
+        EDITOR_START_ROW, EDITOR_START_COL);
+
+    m_window.cbreak();
+    m_window.set_echo(false);
+    m_window.cursor_mode(CURSOR_INVISIBLE_HIGH);
+
+    /* Banner window - No updates during runtime */
+    m_banner_win.create_window(1, COLS, 0, 0);
     std::string heading = "[Text Editor]";
-    int head_position = window.get_width()/2 - heading.size()/2;
-    window.print(0, head_position, heading);
-    window.move(EDITOR_START_ROW, EDITOR_START_COL);
-    set_mode(COMMAND_MODE);
+    int head_position = m_window.get_width()/2 - heading.size()/2;
+    m_banner_win.print(0, head_position, heading);
+
+    /* Command window - Only updates in command mode */
+    m_command_win.create_window(1, COLS, LINES-1, 0);
+
+    m_window.move(0, 0);
+    set_mode(NORMAL_MODE);
+    // set_mode(INSERT_MODE);
 }
 
 void Editor::set_mode(EditorMode mode)  {
-    this->mode = mode;
+    m_mode = mode;
 }
 
 EditorMode Editor::get_mode() {
-    return mode;
+    return m_mode;
 }
 
 void Editor::left_arrow() {
-    int row = window.get_cursor_y();
-    int col = window.get_cursor_x();
+    int row = m_window.get_cursor_y();
+    int col = m_window.get_cursor_x();
     /* If starting of line is reached, resetting to end of previous line */
-    if (col == EDITOR_START_COL) {
+    if (col == 0) {
         /* Cannot move past the first line */
-        if (row > EDITOR_START_ROW) {
-            int length = ds_db.get_row_size(row-EDITOR_START_ROW-1);
-            window.move(row-1, length);
+        if (row > 0) {
+            int length = m_ds_db.get_row_size(row - 1);
+            m_window.move(row - 1, length);
         }
     }
-    else window.movex(col-1);
+    else m_window.movex(col-1);
 }
 
 void Editor::right_arrow() {
-    int row = window.get_cursor_y();
-    int col = window.get_cursor_x();
-    int length = ds_db.get_row_size(row - EDITOR_START_ROW);
+    int row = m_window.get_cursor_y();
+    int col = m_window.get_cursor_x();
+    int length = m_ds_db.get_row_size(row);
     /* If end of line is reached, resetting to beginning of next line */
     if (col == length) {
         /* Cannot move past the last line */
-        if ((row - EDITOR_START_ROW + 1) < ds_db.get_total_rows()) {
-            window.move(row+1, EDITOR_START_COL);
+        if ((row + 1) < m_ds_db.get_total_rows()) {
+            m_window.move(row+1, 0);
         }
     }
-    else window.movex(col+1);
+    else m_window.movex(col+1);
 }
 
 void Editor::down_arrow() {
-    int row = window.get_cursor_y();
-    int col = window.get_cursor_x();
+    int row = m_window.get_cursor_y();
+    int col = m_window.get_cursor_x();
 
     /* Can only move if it is not the last row */
-    if (row < ds_db.get_total_rows()) {
-        int length = ds_db.get_row_size(row - EDITOR_START_ROW + 1);
-        window.move(row+1, std::min(col, length));
+    if (row < m_ds_db.get_total_rows()) {
+        int length = m_ds_db.get_row_size(row + 1);
+        m_window.move(row+1, std::min(col, length));
     }
 }
 
 void Editor::up_arrow() {
-    int row = window.get_cursor_y();
-    int col = window.get_cursor_x();
+    int row = m_window.get_cursor_y();
+    int col = m_window.get_cursor_x();
 
     /* Can only move if it is not the first row */
-    if (row > EDITOR_START_ROW) {
-        int length = ds_db.get_row_size(row - EDITOR_START_ROW - 1);
-        window.move(row-1, std::min(col, length));
+    if (row > 0) {
+        int length = m_ds_db.get_row_size(row - 1);
+        m_window.move(row-1, std::min(col, length));
     }
 }
 
 void Editor::backspace() {
-    CHECK_COMMAND_MODE
-    int row = window.get_cursor_y();
-    int col = window.get_cursor_x();
+    CHECK_NOT_INSERT_MODE
+    int row = m_window.get_cursor_y();
+    int col = m_window.get_cursor_x();
 
     /* If starting of line is reached, resetting to end of previous line */
-    if (col == EDITOR_START_COL) {
-        if (row > EDITOR_START_ROW) {
-            int length = ds_db.get_row_size(row-EDITOR_START_ROW-1);
-            ds_db.delete_row(row-EDITOR_START_ROW);
-            std::string document = ds_db.get_document();
+    if (col == 0) {
+        if (row > 0) {
+            int length = m_ds_db.get_row_size(row - 1);
+            m_ds_db.delete_row(row);
+            std::string document = m_ds_db.get_document();
             re_render(document);
-            window.move(row-1, length);
+            m_window.move(row-1, length);
         }
     }
     else {
-        ds_db.delete_col(row - EDITOR_START_ROW, col - EDITOR_START_COL-1);
-        std::string document = ds_db.get_document();
+        m_ds_db.delete_col(row, col - 1);
+        std::string document = m_ds_db.get_document();
         re_render(document);
-        window.move(row, col-1);
+        m_window.move(row, col-1);
     }
 }
 
 void Editor::enter_key() {
-    CHECK_COMMAND_MODE
-    int row = window.get_cursor_y() - EDITOR_START_ROW;
-    int col = window.get_cursor_x() - EDITOR_START_COL;
-    ds_db.insert_row(row, col);
+    CHECK_NOT_INSERT_MODE
+    int row = m_window.get_cursor_y();
+    int col = m_window.get_cursor_x();
+    m_ds_db.insert_row(row, col);
 
     /* Re-render everything after this enter position */
-    std::string document = ds_db.get_document();
+    std::string document = m_ds_db.get_document();
     re_render(document);
-    window.move(EDITOR_START_ROW + row + 1, EDITOR_START_COL);
+    m_window.move(row + 1, 0);
 }
 
 void Editor::re_render(const std::string &text) {
-    window.clear();
-    window.move(EDITOR_START_ROW, EDITOR_START_COL);
-    for (int c : text) {
-        window.print(c);
-    }
+    m_window.clear();
+    m_window.print(0, 0, text);
+}
+
+void Editor::reset_cursor() {
+    /* TODO: last known position instead of 0, 0 */
+    m_window.move(0, 0);
+}
+
+int Editor::read() {
+    if (get_mode() == COMMAND_MODE) return m_command_win.read();
+    return m_window.read();
 }
 
 void Editor::write(int c) {
-    CHECK_COMMAND_MODE
-    int row = window.get_cursor_y() - EDITOR_START_ROW;
-    int col = window.get_cursor_x() - EDITOR_START_COL;
-    ds_db.insert_col(row, col, c);
-    std::string document = ds_db.get_document();
+    CHECK_NOT_INSERT_MODE
+    int row = m_window.get_cursor_y();
+    int col = m_window.get_cursor_x();
+    m_ds_db.insert_col(row, col, c);
+    std::string document = m_ds_db.get_document();
     re_render(document);
-    window.move(row + EDITOR_START_ROW, col + EDITOR_START_COL + 1);
-    // window.print(c);
+    m_window.move(row, col + 1);
 }
 
-void Editor::command_mode() {
-    int row = window.get_height() - 1;
-    window.print(row, 0, KEY_COMMAND);
+void Editor::enter_command_mode() {
+    clear_command_mode();
+    m_command_win.print(0, 0, KEY_COMMAND);
+    set_mode(COMMAND_MODE);
 }
 
 void Editor::command_write(int c) {
-    window.print(c);
+    m_command_win.print(c);
 }
 
 void Editor::clear_command_mode() {
-    int row = window.get_height() - 1;
-    int max_col = window.get_width() - 1;
-    for (int i=0; i<max_col; ++i) {
-        window.print(row, i, KEY_SPACE);
-    }
-    window.move(EDITOR_START_ROW, EDITOR_START_COL);
+    m_command_win.clear();
 }
 
-void Editor::command_banner() {
-    clear_command_mode();
-    int row = window.get_height() - 1;
-    if (get_mode() == COMMAND_MODE) window.print(row, 0, "Command Mode entered!");
-    else window.print(row, 0, "Insert Mode entered!");
-    window.move(EDITOR_START_ROW, EDITOR_START_COL);
+void Editor::_print_command_banner(std::string msg) {
+    m_command_win.clear();
+    m_command_win.print(0, 0, msg);
+}
+
+void Editor::command_mode_banner() {
+    if (get_mode() == COMMAND_MODE) _print_command_banner(COMMAND_MODE_STR);
+    else if (get_mode() == NORMAL_MODE) _print_command_banner(NORMAL_MODE_STR);
+    else _print_command_banner(INSERT_MODE_STR);
+    reset_cursor();
+}
+
+void Editor::invalid_command() {
+    _print_command_banner(INVALID_COMMAND);
+    reset_cursor();
 }
 
 void Editor::_log_ds() {
-    ds_db.printDS();
+    m_ds_db.printDS();
 }

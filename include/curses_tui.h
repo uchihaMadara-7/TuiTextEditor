@@ -3,6 +3,7 @@
 
 #include <ncurses.h>
 #include <iostream>
+#include "logger.h"
 
 #define CURSOR_INVISIBLE 0
 #define CURSOR_VISIBLE_NORMAL 1
@@ -25,6 +26,7 @@ public:
     ~CursesWindow();
 
     void init();
+    void create_window(int rows, int cols, int row_start, int col_start);
     void cbreak();
     void set_echo(bool flag);
     void cursor_mode(int mode);
@@ -37,8 +39,10 @@ public:
     int get_width();
     int get_cursor_x();
     int get_cursor_y();
-    void print(char c);
-    void print(int y, int x, char c);
+
+    int read();
+    void print(int c);
+    void print(int y, int x, int c);
     void print(std::string msg);
     void print(int y, int x, std::string msg);
 
@@ -50,7 +54,8 @@ public:
 
     template<typename... Args>
     void print(std::string format, Args&&... args) {
-        ::printw(format.c_str(), convert(std::forward<Args>(args))...);
+        ::wprintw(m_win, format.c_str(), convert(std::forward<Args>(args))...);
+        ::wrefresh(m_win);
     }
 
 private:

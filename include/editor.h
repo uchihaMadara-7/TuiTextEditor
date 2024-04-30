@@ -22,12 +22,18 @@
 #define EDITOR_END_ROW_OFFSET 2
 #define EDITOR_END_COL_OFFSET 0
 
+#define NORMAL_MODE_STR "NORMAL MODE!"
+#define INSERT_MODE_STR "INSERT MODE ENTERED!"
+#define COMMAND_MODE_STR "COMMAND MODE ENTERED!"
+#define INVALID_COMMAND "INVALID COMMAND!"
+
 #define LOG_DS Editor::getInstance()._log_ds
 
-#define CHECK_COMMAND_MODE if (mode == COMMAND_MODE) return;
+#define CHECK_NOT_INSERT_MODE if (m_mode != INSERT_MODE) return;
 
 enum EditorMode {
     INSERT_MODE,
+    NORMAL_MODE,
     COMMAND_MODE
 };
 
@@ -60,20 +66,24 @@ public:
     void enter_key();
 
     void re_render(const std::string &text);
+    void reset_cursor();
 
+    int read();
     void write(int c);
 
-    void command_mode();
+    void enter_command_mode();
     void command_write(int c);
     void clear_command_mode();
-    void command_banner();
+    void _print_command_banner(std::string);
+    void command_mode_banner();
+    void invalid_command();
 
     void _log_ds();
 
 private:
-    CursesWindow window;
-    DATA_STRUCTURE ds_db;
-    EditorMode mode;
+    CursesWindow m_window, m_banner_win, m_command_win;
+    DATA_STRUCTURE m_ds_db;
+    EditorMode m_mode;
 };
 
 #endif // __EDITOR_H__
