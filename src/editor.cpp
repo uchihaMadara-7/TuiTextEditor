@@ -15,6 +15,15 @@ void Editor::init() {
     int head_position = window.get_width()/2 - heading.size()/2;
     window.print(0, head_position, heading);
     window.move(EDITOR_START_ROW, EDITOR_START_COL);
+    set_mode(COMMAND_MODE);
+}
+
+void Editor::set_mode(EditorMode mode)  {
+    this->mode = mode;
+}
+
+EditorMode Editor::get_mode() {
+    return mode;
 }
 
 void Editor::left_arrow() {
@@ -68,6 +77,7 @@ void Editor::up_arrow() {
 }
 
 void Editor::backspace() {
+    CHECK_COMMAND_MODE
     int row = window.get_cursor_y();
     int col = window.get_cursor_x();
 
@@ -90,6 +100,7 @@ void Editor::backspace() {
 }
 
 void Editor::enter_key() {
+    CHECK_COMMAND_MODE
     int row = window.get_cursor_y() - EDITOR_START_ROW;
     int col = window.get_cursor_x() - EDITOR_START_COL;
     ds_db.insert_row(row, col);
@@ -109,10 +120,40 @@ void Editor::re_render(const std::string &text) {
 }
 
 void Editor::write(int c) {
+    CHECK_COMMAND_MODE
     int row = window.get_cursor_y() - EDITOR_START_ROW;
     int col = window.get_cursor_x() - EDITOR_START_COL;
     ds_db.insert_col(row, col, c);
+    std::string document = ds_db.get_document();
+    re_render(document);
+    window.move(row + EDITOR_START_ROW, col + EDITOR_START_COL + 1);
+    // window.print(c);
+}
+
+void Editor::command_mode() {
+    int row = window.get_height() - 1;
+    window.print(row, 0, KEY_COMMAND);
+}
+
+void Editor::command_write(int c) {
     window.print(c);
+}
+
+void Editor::clear_command_mode() {
+    int row = window.get_height() - 1;
+    int max_col = window.get_width() - 1;
+    for (int i=0; i<max_col; ++i) {
+        window.print(row, i, KEY_SPACE);
+    }
+    window.move(EDITOR_START_ROW, EDITOR_START_COL);
+}
+
+void Editor::command_banner() {
+    clear_command_mode();
+    int row = window.get_height() - 1;
+    if (get_mode() == COMMAND_MODE) window.print(row, 0, "Command Mode entered!");
+    else window.print(row, 0, "Insert Mode entered!");
+    window.move(EDITOR_START_ROW, EDITOR_START_COL);
 }
 
 void Editor::_log_ds() {

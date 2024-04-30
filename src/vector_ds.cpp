@@ -16,7 +16,7 @@ void VectorDS::delete_row(int row) {
 
 void VectorDS::insert_col(int row, int col, int value) {
     int position = get_position(row, col);
-    DEBUG_TRACE("Insert at %d: %c (%d, %d)", position, value, row, col);
+    DEBUG_TRACE("Insert at %d: (ascii: %d) %c (%d, %d)", position, value, value, row, col);
     insert(m_container, position, value);
 
     /* Maintaing characters per row - meta data */
@@ -58,7 +58,8 @@ std::string VectorDS::get_document() {
         for (int i=position; i<position+m_meta_data[row]; ++i) {
             document.append(1, m_container[i]);
         }
-        document.append(1, NEW_LINE);
+        if (row < size-1)
+            document.append(1, NEW_LINE);
     }
     return document;
 }

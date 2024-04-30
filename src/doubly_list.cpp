@@ -31,8 +31,24 @@ void DoublyList2D::insert_row() {
         lineNode *temp_row = new lineNode();
         current_row->next = temp_row;
         temp_row->prev = current_row;
+        /* TODO: Update length of rows as well */
+        /* If current_col was pointing to null or before first element */
+        if (!current_col) {
+            current_col = nullptr;
+        }
+        /* If current_col was pointing to first element */
+        else if (current_row->head == current_col) {
+            // temp_row->head = current_col->
+        }
+        /* If current_col was pointing to some middle element */
+        else {
+            temp_row->head = current_col->next;
+            temp_row->tail = current_row->tail;
+            current_row->tail = current_col;
+            current_col->next = nullptr;
+            // current_col->nullptr;
+        }
         current_row = temp_row;
-        current_col = nullptr;
     }
 }
 

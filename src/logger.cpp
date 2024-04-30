@@ -37,3 +37,25 @@ void Logger::set_level(LogLevel level) {
 void Logger::set_verbosity(bool verbosity) {
     m_verbose = verbosity;
 }
+
+std::string Logger::_get_level_str(LogLevel c_level) {
+    switch(c_level) {
+        case LOG_ERROR: return ERROR_STR;
+        case LOG_INFO: return INFO_STR;
+        case LOG_DEBUG: return DEBUG_STR;
+    }
+    /* Fallback to INFO level */
+    return INFO_STR;
+}
+
+void Logger::error(std::string msg) {
+    _trace(LOG_ERROR, "%s", msg);
+}
+
+void Logger::info(std::string msg) {
+    _trace(LOG_INFO, "%s", msg);
+}
+
+void Logger::debug(std::string msg) {
+    _trace(LOG_DEBUG, "%s", msg);
+}

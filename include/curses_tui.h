@@ -14,6 +14,11 @@
     #define KEY_ENTER 10
 #endif
 
+#define KEY_ESC 27
+#define KEY_COMMAND 58
+#define KEY_SPACE 32
+#define KEY_INSERT 105
+
 class CursesWindow {
 public:
     CursesWindow();

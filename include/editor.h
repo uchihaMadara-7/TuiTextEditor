@@ -19,8 +19,17 @@
 #define SPACE ' '
 #define EDITOR_START_ROW 1
 #define EDITOR_START_COL 0
+#define EDITOR_END_ROW_OFFSET 2
+#define EDITOR_END_COL_OFFSET 0
 
 #define LOG_DS Editor::getInstance()._log_ds
+
+#define CHECK_COMMAND_MODE if (mode == COMMAND_MODE) return;
+
+enum EditorMode {
+    INSERT_MODE,
+    COMMAND_MODE
+};
 
 class Editor {
 public:
@@ -39,6 +48,9 @@ public:
 
     void init();
 
+    void set_mode(EditorMode mode);
+    EditorMode get_mode();
+
     void left_arrow();
     void right_arrow();
     void down_arrow();
@@ -50,11 +62,18 @@ public:
     void re_render(const std::string &text);
 
     void write(int c);
+
+    void command_mode();
+    void command_write(int c);
+    void clear_command_mode();
+    void command_banner();
+
     void _log_ds();
 
 private:
     CursesWindow window;
     DATA_STRUCTURE ds_db;
+    EditorMode mode;
 };
 
 #endif // __EDITOR_H__

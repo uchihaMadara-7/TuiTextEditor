@@ -40,15 +40,10 @@ public:
     void set_level(LogLevel level);
     void set_verbosity(bool verbosity);
 
-    std::string _get_level_str(LogLevel c_level) {
-        switch(c_level) {
-            case LOG_ERROR: return ERROR_STR;
-            case LOG_INFO: return INFO_STR;
-            case LOG_DEBUG: return DEBUG_STR;
-        }
-        /* Fallback to INFO level */
-        return INFO_STR;
-    }
+    std::string _get_level_str(LogLevel c_level);
+    void error(std::string msg);
+    void info(std::string msg);
+    void debug(std::string msg);
 
     template<typename T>
     static auto convert(const T& arg) {
@@ -57,7 +52,7 @@ public:
     }
 
     template<typename... Args>
-    void trace(LogLevel c_level, std::string format, Args&&... args) {
+    void _trace(LogLevel c_level, std::string format, Args&&... args) {
         if (c_level > m_level) {
             return;
         }
@@ -74,17 +69,17 @@ public:
 
     template<typename... Args>
     void error(std::string format, Args&&... args) {
-        trace(LOG_ERROR, format, args...);
+        _trace(LOG_ERROR, format, args...);
     }
 
     template<typename... Args>
     void info(std::string format, Args&&... args) {
-        trace(LOG_INFO, format, args...);
+        _trace(LOG_INFO, format, args...);
     }
 
     template<typename... Args>
     void debug(std::string format, Args&&... args) {
-        trace(LOG_DEBUG, format, args...);
+        _trace(LOG_DEBUG, format, args...);
     }
 
 private:

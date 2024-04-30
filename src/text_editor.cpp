@@ -15,38 +15,74 @@ int main() {
     logger.set_level(LOG_DEBUG);
 
     Editor& editor = Editor::getInstance();
-    while (int c = getch()) {
-        if (c == 'q') break;
+    std::string command;
+    bool command_mode_quit, app_quit = false;
+    int c;
+
+    while (!app_quit && (c = getch())) {
         switch(c) {
             case KEY_LEFT:
-                // Case-1 check if it can go out-of-bounds
-                // Case-2 When on start of line, move y to y-1 and x to last character on line y-1
                 editor.left_arrow();
                 break;
             case KEY_RIGHT:
-                // Case-1 can't move beyond last character
-                // Case-2 When on last of line, move y to y+1 and x to 0
                 editor.right_arrow();
                 break;
             case KEY_UP:
-                //  TODO check if it can go out-of-bounds (1st row)
                 editor.up_arrow();
                 break;
             case KEY_DOWN:
-                // TODO can't move beyond last line
                 editor.down_arrow();
                 break;
             case KEY_BACKSPACE:
-                // When on empty line, move y to y-1 and x to last character on line y-1
                 editor.backspace();
                 break;
             case KEY_ENTER:
-                // Case, if enter is pressed on middle of line (with words on left and right)
-                // then, all the characters on right should move to next line
                 editor.enter_key();
                 break;
+            case KEY_ESC:
+                if (editor.get_mode() != COMMAND_MODE) {
+                    DEBUG_TRACE("Command mode activated!");
+                    editor.set_mode(COMMAND_MODE);
+                    editor.command_banner();
+                }
+                break;
+            case KEY_INSERT:
+                if (editor.get_mode() == COMMAND_MODE) {
+                    DEBUG_TRACE("Insert mode activated!");
+                    editor.set_mode(INSERT_MODE);
+                    editor.command_banner();
+                }
+                else editor.write(c);
+                break;
+            case KEY_COMMAND:
+                DEBUG_TRACE("Command line entered!");
+                editor.clear_command_mode();
+                editor.command_mode();
+                command = std::string();
+                command_mode_quit = true;
+                while (command_mode_quit && (c = getch())) {
+                    switch(c) {
+                        case KEY_ESC:
+                            editor.clear_command_mode();
+                            command_mode_quit = false;
+                            break;
+                        case KEY_ENTER:
+                            DEBUG_TRACE("Command: %s", command);
+                            editor.clear_command_mode();
+                            if (command == "i" || command == "insert") {
+                                editor.set_mode(INSERT_MODE);
+                                editor.command_banner();
+                            }
+                            else if (command == "q" || command == "quit") app_quit = true;
+                            command_mode_quit = false;
+                            break;
+                        default:
+                            command.append(1, c);
+                            editor.command_write(c);
+                    }
+                }
+                break;
             default:
-                // Case-1, writing in middle of text (shift all to right)
                 editor.write(c);
         }
     }
