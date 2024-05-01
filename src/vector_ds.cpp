@@ -50,14 +50,20 @@ int VectorDS::get_total_rows() {
     return m_meta_data.size();
 }
 
+std::string VectorDS::get_row(int row) {
+    std::string row_str = std::string();
+    int position = get_position(row, 0);
+    for (int i=position; i<position+m_meta_data[row]; ++i) {
+        row_str.append(1, m_container[i]);
+    }
+    return row_str;
+}
+
 std::string VectorDS::get_document() {
     std::string document = std::string();
     int size = m_meta_data.size();
     for (int row=0; row<size; ++row) {
-        int position = get_position(row, 0);
-        for (int i=position; i<position+m_meta_data[row]; ++i) {
-            document.append(1, m_container[i]);
-        }
+        document.append(get_row(row));
         if (row < size-1)
             document.append(1, NEW_LINE);
     }

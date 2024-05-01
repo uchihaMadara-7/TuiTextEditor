@@ -8,10 +8,10 @@ Editor::Editor() {
 Editor::~Editor() {}
 
 void Editor::init() {
+    /* Main text editor window */
     m_window.create_window(LINES - EDITOR_END_ROW_OFFSET,
         COLS - EDITOR_END_COL_OFFSET,
         EDITOR_START_ROW, EDITOR_START_COL);
-
     m_window.cbreak();
     m_window.set_echo(false);
     m_window.cursor_mode(CURSOR_INVISIBLE_HIGH);
@@ -19,7 +19,7 @@ void Editor::init() {
     /* Banner window - No updates during runtime */
     m_banner_win.create_window(1, COLS, 0, 0);
     std::string heading = "[Tui Text Editor]";
-    int head_position = m_window.get_width()/2 - heading.size()/2;
+    int head_position = m_banner_win.get_width()/2 - heading.size()/2;
     m_banner_win.print(0, head_position, heading);
 
     /* Command window - Only updates in command mode */
@@ -103,15 +103,15 @@ void Editor::backspace() {
         if (row > 0) {
             int length = m_ds_db.get_row_size(row - 1);
             m_ds_db.delete_row(row);
-            std::string document = m_ds_db.get_document();
-            re_render(document);
+
+            re_render();
             m_window.move(row-1, length);
         }
     }
     else {
         m_ds_db.delete_col(row, col - 1);
-        std::string document = m_ds_db.get_document();
-        re_render(document);
+
+        re_render();
         m_window.move(row, col-1);
     }
 }
@@ -123,14 +123,16 @@ void Editor::enter_key() {
     m_ds_db.insert_row(row, col);
 
     /* Re-render everything after this enter position */
-    std::string document = m_ds_db.get_document();
-    re_render(document);
+    re_render();
     m_window.move(row + 1, 0);
 }
 
-void Editor::re_render(const std::string &text) {
-    m_window.clear();
-    m_window.print(0, 0, text);
+void Editor::re_render() {
+    int total_rows = m_ds_db.get_total_rows();
+    for (int row=0; row<total_rows; ++row) {
+        std::string row_str = m_ds_db.get_row(row);
+        m_window.print(row, 0, row_str);
+    }
 }
 
 void Editor::reset_cursor() {
@@ -155,8 +157,8 @@ void Editor::write(int c) {
     int row = m_window.get_cursor_y();
     int col = m_window.get_cursor_x();
     m_ds_db.insert_col(row, col, c);
-    std::string document = m_ds_db.get_document();
-    re_render(document);
+    re_render();
+    /* ncurses auto move to next line when line end is reached */
     m_window.move(row, col + 1);
 }
 

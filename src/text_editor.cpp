@@ -38,7 +38,8 @@ bool read_command(Editor &editor) {
                         editor.set_mode(INSERT_MODE);
                         editor.command_mode_banner();
                         break;
-                    case 2: return true;
+                    case 2:
+                        return true;
                     default:
                         editor.set_mode(NORMAL_MODE);
                         editor.invalid_command();

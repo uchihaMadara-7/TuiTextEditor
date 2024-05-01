@@ -65,7 +65,7 @@ public:
     void backspace();
     void enter_key();
 
-    void re_render(const std::string &text);
+    void re_render();
     void reset_cursor();
     void set_line_placeholder();
 

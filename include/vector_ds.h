@@ -25,6 +25,7 @@ public:
     int get_row_size(int row);
     int get_total_rows();
 
+    std::string get_row(int row);
     std::string get_document();
 
     /* This APIs are for debugging purpose and not utility */
