@@ -128,6 +128,7 @@ void Editor::enter_key() {
 }
 
 void Editor::re_render() {
+    m_window.clear();
     int total_rows = m_ds_db.get_total_rows();
     for (int row=0; row<total_rows; ++row) {
         std::string row_str = m_ds_db.get_row(row);
@@ -180,6 +181,7 @@ void Editor::clear_command_mode() {
 }
 
 void Editor::_print_command_banner(std::string msg) {
+    m_command_win.clear();
     m_command_win.print(0, 0, msg);
 }
 
