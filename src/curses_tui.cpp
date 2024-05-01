@@ -26,6 +26,11 @@ void CursesWindow::init() {
         ::initscr();
         /* Allow handling of control characters like arrow keys, enter, ... */
         ::keypad(stdscr, TRUE);
+        ::start_color();
+        ::use_default_colors();
+        /* Default color pair 0 cannot be modified */
+        // init_pair(0, -1, -1);
+        // ::wattron(m_win, COLOR_PAIR(0));
         ::refresh();
         m_initialized = true;
     }
@@ -93,6 +98,10 @@ int CursesWindow::get_cursor_x() {
 
 int CursesWindow::get_cursor_y() {
     return ::getcury(m_win);
+}
+
+WINDOW* CursesWindow::get_window() {
+    return m_win;
 }
 
 int CursesWindow::read() {

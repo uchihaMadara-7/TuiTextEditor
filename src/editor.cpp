@@ -141,6 +141,9 @@ void Editor::reset_cursor() {
 }
 
 void Editor::set_line_placeholder() {
+    /* Setting color to line window */
+    init_pair(LINE_COLOR, COLOR_YELLOW, -1);
+    ::wattron(m_line_win.get_window(), COLOR_PAIR(LINE_COLOR));
     int total_lines = m_line_win.get_height();
     for (int i=0; i<total_lines; ++i) {
         m_line_win.print('~');
@@ -177,7 +180,6 @@ void Editor::clear_command_mode() {
 }
 
 void Editor::_print_command_banner(std::string msg) {
-    m_command_win.clear();
     m_command_win.print(0, 0, msg);
 }
 
@@ -189,7 +191,10 @@ void Editor::command_mode_banner() {
 }
 
 void Editor::invalid_command() {
+    init_pair(INVALID_COLOR, COLOR_WHITE, COLOR_RED);
+    ::wattron(m_command_win.get_window(), COLOR_PAIR(INVALID_COLOR));
     _print_command_banner(INVALID_COMMAND);
+    wstandend(m_command_win.get_window());
     reset_cursor();
 }
 

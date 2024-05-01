@@ -21,6 +21,9 @@
 #define KEY_INSERT_1 105
 #define KEY_INSERT_2 97
 
+#define LINE_COLOR 1
+#define INVALID_COLOR 2
+
 class CursesWindow {
 public:
     CursesWindow();
@@ -35,11 +38,13 @@ public:
     void move(int y, int x);
     void movex(int x);
     void movey(int y);
+
     void get_dimension(int &height, int &width);
     int get_height();
     int get_width();
     int get_cursor_x();
     int get_cursor_y();
+    WINDOW* get_window();
 
     int read();
     void print(int c);
