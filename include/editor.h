@@ -1,6 +1,7 @@
 #ifndef __EDITOR_H__
 #define __EDITOR_H__
 
+#include <fstream>
 #include "curses_tui.h"
 
 #ifdef DOUBLY_LIST_DS
@@ -95,7 +96,7 @@ private:
     CursesWindow m_window, m_banner_win, m_command_win, m_line_win;
     DATA_STRUCTURE m_ds_db;
     EditorMode m_mode;
-    FILE* m_file_handler;
+    std::fstream m_file_handler;
     std::string m_filename;
     bool m_initialised = false;
 };

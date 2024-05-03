@@ -7,8 +7,10 @@ Editor::Editor() {
 }
 
 Editor::~Editor() {
-    DEBUG_TRACE("File closed!");
-    fclose(m_file_handler);
+    if (m_file_handler.is_open()) {
+        m_file_handler.close();
+        DEBUG_TRACE("File closed!");
+    }
 }
 
 void Editor::init() {
@@ -50,24 +52,45 @@ void Editor::set_init(bool value) {
 bool  Editor::set_file(std::string filename) {
     /* Try opening file if possible */
     m_filename = filename;
-    m_file_handler = fopen(m_filename.c_str(), "w");
-    if (!m_file_handler) {
+    m_file_handler.open(m_filename, std::ios::in);
+    if (!m_file_handler.is_open()) {
         return false;
     }
+
+    DEBUG_TRACE("Reading file!");
+    // m_file_handler.seekp(std::ios::beg);
+    std::string line_text;
+    set_mode(EditorMode::INSERT_MODE);
+    while (std::getline(m_file_handler, line_text)) {
+        for (int c : line_text) write(c);
+        enter_key();
+    }
+    set_mode(EditorMode::NORMAL_MODE);
+    m_file_handler.close();
+
+    /* Re-opening in write mode: out|in doesn't destroy the existing content */
+    m_file_handler.open(m_filename, std::ios::out | std::ios::in);
+    if (!m_file_handler.is_open()) {
+        return false;
+    }
+
     return true;
 }
 
 void Editor::save_file() {
-    if (!m_file_handler) {
+    if (!m_file_handler.is_open()) {
         DEBUG_TRACE("No file was opened!");
         _print_command_banner(NO_FILE_STR);
         reset_cursor();
         return;
     }
+
+    DEBUG_TRACE("Saving file!");
+    m_file_handler.seekp(std::ios::beg);
     int total_rows = m_ds_db.get_total_rows();
     for (int row=0; row<total_rows; ++row) {
         std::string row_str = m_ds_db.get_row(row);
-        fprintf(m_file_handler, "%s\n", row_str.c_str());
+        m_file_handler << row_str << std::endl;
     }
     _print_command_banner(SAVE_FILE_STR);
 }
