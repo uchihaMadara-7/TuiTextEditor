@@ -1,6 +1,7 @@
 #include "editor.h"
 #include "logger.h"
 #include <cstdio>
+#include <filesystem>
 
 Editor::Editor() {
     init();
@@ -53,23 +54,26 @@ bool  Editor::set_file(std::string filename) {
     /* Try opening file if possible */
     m_filename = filename;
     m_file_handler.open(m_filename, std::ios::in);
-    if (!m_file_handler.is_open()) {
-        return false;
+    if (m_file_handler.is_open()) {
+        DEBUG_TRACE("Reading file!");
+        std::string line_text;
+        set_mode(EditorMode::INSERT_MODE);
+        while (std::getline(m_file_handler, line_text)) {
+            for (int c : line_text) write(c);
+            enter_key();
+        }
+        set_mode(EditorMode::NORMAL_MODE);
+        m_file_handler.close();
     }
-
-    DEBUG_TRACE("Reading file!");
-    // m_file_handler.seekp(std::ios::beg);
-    std::string line_text;
-    set_mode(EditorMode::INSERT_MODE);
-    while (std::getline(m_file_handler, line_text)) {
-        for (int c : line_text) write(c);
-        enter_key();
-    }
-    set_mode(EditorMode::NORMAL_MODE);
-    m_file_handler.close();
 
     /* Re-opening in write mode: out|in doesn't destroy the existing content */
-    m_file_handler.open(m_filename, std::ios::out | std::ios::in);
+    if (std::filesystem::exists(filename))
+        m_file_handler.open(m_filename, std::ios::out | std::ios::in);
+    else {
+        m_file_handler.open(m_filename, std::ios::out);
+        m_newfile = true;
+    }
+
     if (!m_file_handler.is_open()) {
         return false;
     }
@@ -92,7 +96,12 @@ void Editor::save_file() {
         std::string row_str = m_ds_db.get_row(row);
         m_file_handler << row_str << std::endl;
     }
+    m_saved_once = true;
     _print_command_banner(SAVE_FILE_STR);
+}
+
+void Editor::remove_file() {
+    std::remove(m_filename.c_str());
 }
 
 void Editor::set_mode(EditorMode mode)  {
@@ -104,6 +113,10 @@ void Editor::set_mode(EditorMode mode)  {
 
 EditorMode Editor::get_mode() {
     return m_mode;
+}
+
+bool Editor::get_remove_required() {
+    return m_newfile && !m_saved_once;
 }
 
 void Editor::left_arrow() {

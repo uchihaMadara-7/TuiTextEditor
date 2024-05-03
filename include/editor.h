@@ -64,6 +64,8 @@ public:
     void save_file();
     void set_mode(EditorMode mode);
     EditorMode get_mode();
+    void remove_file();
+    bool get_remove_required();
 
     void left_arrow();
     void right_arrow();
@@ -99,6 +101,8 @@ private:
     std::fstream m_file_handler;
     std::string m_filename;
     bool m_initialised = false;
+    bool m_newfile = false;
+    bool m_saved_once = false;
 };
 
 #endif // __EDITOR_H__

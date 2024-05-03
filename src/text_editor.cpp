@@ -31,6 +31,7 @@ bool read_command(Editor &editor) {
                         editor.save_file();
                         /* Intentionally break skipped, to fall back to quit */
                     case (int) CommandType::QUIT:
+                        if (editor.get_remove_required()) editor.remove_file();
                         return true;
                     default:
                         editor.set_mode(EditorMode::NORMAL_MODE);
