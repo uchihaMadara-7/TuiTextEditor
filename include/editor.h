@@ -25,13 +25,17 @@
 #define NORMAL_MODE_STR "---- NORMAL MODE ----"
 #define INSERT_MODE_STR "---- INSERT MODE ----"
 #define COMMAND_MODE_STR "---- COMMAND MODE ----"
+#define SAVE_FILE_STR "---- FILE SAVED ----"
+#define NO_FILE_STR "---- NO FILE OPENED ----"
 #define INVALID_COMMAND "---- INVALID COMMAND ----"
 
 #define LOG_DS Editor::getInstance()._log_ds
 
-#define CHECK_NOT_INSERT_MODE if (m_mode != INSERT_MODE) return;
+#define CHECK_NOT_INSERT_MODE if (m_mode != EditorMode::INSERT_MODE) return;
 
-enum EditorMode {
+extern std::string editor_filename;
+
+enum class EditorMode {
     INSERT_MODE,
     NORMAL_MODE,
     COMMAND_MODE
@@ -53,7 +57,10 @@ public:
     }
 
     void init();
+    bool is_initialized();
 
+    bool set_file(std::string filename);
+    void save_file();
     void set_mode(EditorMode mode);
     EditorMode get_mode();
 
@@ -82,9 +89,15 @@ public:
     void _log_ds();
 
 private:
+    void set_init(bool);
+
+private:
     CursesWindow m_window, m_banner_win, m_command_win, m_line_win;
     DATA_STRUCTURE m_ds_db;
     EditorMode m_mode;
+    FILE* m_file_handler;
+    std::string m_filename;
+    bool m_initialised = false;
 };
 
 #endif // __EDITOR_H__

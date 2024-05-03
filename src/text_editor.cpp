@@ -1,23 +1,8 @@
-#include <iostream>
 #include "editor.h"
 #include "logger.h"
-#include <map>
+#include "utility.h"
 
 #define LOG_FILE "editor.log"
-
-std::map<std::string, int> command_codes = {
-    std::make_pair("i", 1),
-    std::make_pair("insert", 1),
-    std::make_pair("q", 2),
-    std::make_pair("quit", 2)
-};
-
-int get_command_code(std::string command) {
-    if (command_codes.count(command)) {
-        return command_codes[command];
-    }
-    return 0;
-}
 
 bool read_command(Editor &editor) {
     editor.enter_command_mode();
@@ -27,21 +12,28 @@ bool read_command(Editor &editor) {
     while (!command_mode_quit && (c = editor.read())) {
         switch(c) {
             case KEY_ESC:
-                editor.clear_command_mode();
-                editor.set_mode(NORMAL_MODE);
+                editor.set_mode(EditorMode::NORMAL_MODE);
+                editor.command_mode_banner();
                 command_mode_quit = true;
                 break;
             case KEY_ENTER:
                 DEBUG_TRACE("Command: %s", command);
-                switch(get_command_code(command)) {
-                    case 1:
-                        editor.set_mode(INSERT_MODE);
+                switch((int) get_command_code(command)) {
+                    case (int) CommandType::INSERT:
+                        editor.set_mode(EditorMode::INSERT_MODE);
                         editor.command_mode_banner();
                         break;
-                    case 2:
+                    case (int) CommandType::WRITE:
+                        editor.set_mode(EditorMode::NORMAL_MODE);
+                        editor.save_file();
+                        break;
+                    case (int) CommandType::WRITE_CLOSE:
+                        editor.save_file();
+                        /* Intentionally break skipped, to fall back to quit */
+                    case (int) CommandType::QUIT:
                         return true;
                     default:
-                        editor.set_mode(NORMAL_MODE);
+                        editor.set_mode(EditorMode::NORMAL_MODE);
                         editor.invalid_command();
                 }
                 command_mode_quit = true;
@@ -54,17 +46,39 @@ bool read_command(Editor &editor) {
     return false;
 }
 
-int main() {
+void usage(int argc, char* prog) {
+    printf("Too many arguments (expected: 1, provided: %d)\n", argc);
+    printf("Usage: %s <file_path>\n", basename(std::string(prog)).c_str());
+}
+
+int main(int argc, char *argv[]) {
+
+    if (argc > 2) {
+        usage(argc, argv[0]);
+        return 1;
+    }
 
     /* Setting up logger */
     Logger &logger = Logger::getInstance(LOG_FILE);
     if (!logger.is_initialized()) {
         /* Early return due to init failure */
+        printf("Log initialisation failed!");
         return 1;
     }
     logger.set_level(LOG_DEBUG);
 
     Editor& editor = Editor::getInstance();
+    if (!editor.is_initialized()) {
+        printf("Editor Initialisation failed!");
+        return 1;
+    }
+
+    /* If second argument is present, open file */
+    if (argc == 2 && !editor.set_file(std::string(argv[1]))) {
+        printf("Failed to open file!");
+        return 1;
+    }
+
     bool app_quit = false;
     int c;
 
@@ -89,24 +103,21 @@ int main() {
                 editor.enter_key();
                 break;
             case KEY_ESC:
-                if (editor.get_mode() == INSERT_MODE) {
-                    DEBUG_TRACE("Normal mode activated!");
-                    editor.set_mode(NORMAL_MODE);
+                if (editor.get_mode() == EditorMode::INSERT_MODE) {
+                    editor.set_mode(EditorMode::NORMAL_MODE);
                     editor.command_mode_banner();
                 }
                 break;
             case KEY_INSERT_1:
             case KEY_INSERT_2:
-                if (editor.get_mode() == NORMAL_MODE) {
-                    DEBUG_TRACE("Insert mode activated!");
-                    editor.set_mode(INSERT_MODE);
+                if (editor.get_mode() ==EditorMode:: NORMAL_MODE) {
+                    editor.set_mode(EditorMode::INSERT_MODE);
                     editor.command_mode_banner();
                 }
                 else editor.write(c);
                 break;
             case KEY_COMMAND:
-                if (editor.get_mode() == NORMAL_MODE) {
-                    DEBUG_TRACE("Command mode activated!");
+                if (editor.get_mode() ==EditorMode:: NORMAL_MODE) {
                     app_quit = read_command(editor);
                 }
                 else editor.write(c);

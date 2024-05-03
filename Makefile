@@ -2,6 +2,8 @@
 CXX = g++
 
 CXXFLAGS = -std=c++20
+# DEBUG SYMBOLS TO BINARY
+# CXXFLAGS += -g
 
 WARNINGS = -Wno-macro-redefined
 WARNINGS += -Wall
@@ -22,6 +24,7 @@ LOG_FILE = editor.log
 SOURCE_DIR = src
 
 VECTOR_DS_SRC = $(SOURCE_DIR)/text_editor.cpp
+VECTOR_DS_SRC += $(SOURCE_DIR)/utility.cpp
 VECTOR_DS_SRC += $(SOURCE_DIR)/curses_tui.cpp
 VECTOR_DS_SRC += $(SOURCE_DIR)/editor.cpp
 VECTOR_DS_SRC += $(SOURCE_DIR)/vector_ds.cpp

@@ -1,11 +1,15 @@
 #include "editor.h"
 #include "logger.h"
+#include <cstdio>
 
 Editor::Editor() {
     init();
 }
 
-Editor::~Editor() {}
+Editor::~Editor() {
+    DEBUG_TRACE("File closed!");
+    fclose(m_file_handler);
+}
 
 void Editor::init() {
     /* Main text editor window */
@@ -31,11 +35,47 @@ void Editor::init() {
     set_line_placeholder();
 
     m_window.move(0, 0);
-    set_mode(NORMAL_MODE);
-    // set_mode(INSERT_MODE);
+    set_mode(EditorMode::NORMAL_MODE);
+    set_init(true);
+}
+
+bool Editor::is_initialized() {
+    return m_initialised;
+}
+
+void Editor::set_init(bool value) {
+    m_initialised = value;
+}
+
+bool  Editor::set_file(std::string filename) {
+    /* Try opening file if possible */
+    m_filename = filename;
+    m_file_handler = fopen(m_filename.c_str(), "w");
+    if (!m_file_handler) {
+        return false;
+    }
+    return true;
+}
+
+void Editor::save_file() {
+    if (!m_file_handler) {
+        DEBUG_TRACE("No file was opened!");
+        _print_command_banner(NO_FILE_STR);
+        reset_cursor();
+        return;
+    }
+    int total_rows = m_ds_db.get_total_rows();
+    for (int row=0; row<total_rows; ++row) {
+        std::string row_str = m_ds_db.get_row(row);
+        fprintf(m_file_handler, "%s\n", row_str.c_str());
+    }
+    _print_command_banner(SAVE_FILE_STR);
 }
 
 void Editor::set_mode(EditorMode mode)  {
+    if (mode == EditorMode::INSERT_MODE) DEBUG_TRACE("Insert mode activated!");
+    else if (mode == EditorMode::NORMAL_MODE) DEBUG_TRACE("Normal mode activated!");
+    else DEBUG_TRACE("Command mode activated!");
     m_mode = mode;
 }
 
@@ -152,7 +192,7 @@ void Editor::set_line_placeholder() {
 }
 
 int Editor::read() {
-    if (get_mode() == COMMAND_MODE) return m_command_win.read();
+    if (get_mode() == EditorMode::COMMAND_MODE) return m_command_win.read();
     return m_window.read();
 }
 
@@ -169,7 +209,7 @@ void Editor::write(int c) {
 void Editor::enter_command_mode() {
     clear_command_mode();
     m_command_win.print(0, 0, KEY_COMMAND);
-    set_mode(COMMAND_MODE);
+    set_mode(EditorMode::COMMAND_MODE);
 }
 
 void Editor::command_write(int c) {
@@ -186,8 +226,8 @@ void Editor::_print_command_banner(std::string msg) {
 }
 
 void Editor::command_mode_banner() {
-    if (get_mode() == COMMAND_MODE) _print_command_banner(COMMAND_MODE_STR);
-    else if (get_mode() == NORMAL_MODE) _print_command_banner(NORMAL_MODE_STR);
+    if (get_mode() == EditorMode::COMMAND_MODE) _print_command_banner(COMMAND_MODE_STR);
+    else if (get_mode() == EditorMode::NORMAL_MODE) _print_command_banner(NORMAL_MODE_STR);
     else _print_command_banner(INSERT_MODE_STR);
     reset_cursor();
 }
