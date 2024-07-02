@@ -8,8 +8,16 @@
 #ifndef __CURSES_TUI_H__
 #define __CURSES_TUI_H__
 
+/* standard imports */
+/* C imports first */
 #include <ncurses.h>
+
+/* C++ imports */
 #include <iostream>
+#include <string>
+#include <utility>
+
+/* custom imports */
 #include "logger.h"
 
 #define CURSOR_INVISIBLE 0
@@ -32,7 +40,7 @@
 #define INVALID_COLOR 2
 
 class CursesWindow {
-public:
+ public:
     CursesWindow();
     ~CursesWindow();
 
@@ -61,8 +69,10 @@ public:
 
     template<typename T>
     static auto convert(const T& arg) {
-        if constexpr(std::is_same_v<T, std::string>) return arg.c_str();
-        else return arg;
+        if constexpr(std::is_same_v<T, std::string>) {
+            return arg.c_str();
+        }
+        return arg;
     }
 
     template<typename... Args>
@@ -71,11 +81,11 @@ public:
         ::wrefresh(m_win);
     }
 
-private:
+ private:
     static bool m_initialized;
     WINDOW* m_win;
     int m_height;
     int m_width;
 };
 
-#endif // __CURSES_TUI_H__
+#endif /* __CURSES_TUI_H__ */

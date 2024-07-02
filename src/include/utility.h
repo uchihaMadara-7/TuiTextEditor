@@ -8,8 +8,10 @@
 #ifndef __UTILITY__
 #define __UTILITY__
 
+/* standard import */
 #include <map>
 #include <string>
+#include <vector>
 
 enum class CommandType {
     INSERT,

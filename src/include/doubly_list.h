@@ -17,7 +17,7 @@ struct charNode {
         prev = next = nullptr;
     }
 
-    charNode(int value) {
+    explicit charNode(int value) {
         prev = next = nullptr;
         this->value = value;
     }
@@ -38,7 +38,7 @@ struct lineNode {
 };
 
 class DoublyList2D {
-public:
+ public:
     DoublyList2D();
     ~DoublyList2D();
 
@@ -50,7 +50,7 @@ public:
     int get_row_size();
     lineNode* get_first_row();
 
-private:
+ private:
     lineNode *document = nullptr;
     lineNode *current_row = nullptr;
     charNode *current_col = nullptr;

@@ -8,8 +8,10 @@
 #ifndef __LOGGER__
 #define __LOGGER__
 
-#include <iostream>
+/* standard imports */
 #include <cstdio>
+#include <iostream>
+#include <string>
 
 #define NO_LOG_FILE "NO_LOG_FILE"
 #define ERROR_STR "[ERROR]: "
@@ -28,9 +30,9 @@ enum LogLevel {
 };
 
 class Logger {
-public:
+ public:
     Logger();
-    Logger(std::string log_file);
+    explicit Logger(std::string log_file);
     ~Logger();
 
     static Logger& getInstance() {
@@ -54,8 +56,10 @@ public:
 
     template<typename T>
     static auto convert(const T& arg) {
-        if constexpr(std::is_same_v<T, std::string>) return arg.c_str();
-        else return arg;
+        if constexpr(std::is_same_v<T, std::string>) {
+            return arg.c_str();
+        }
+        return arg;
     }
 
     template<typename... Args>
@@ -89,7 +93,7 @@ public:
         _trace(LOG_DEBUG, format, args...);
     }
 
-private:
+ private:
     LogLevel m_level;
     bool m_verbose;
     bool m_initialized;

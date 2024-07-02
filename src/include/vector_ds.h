@@ -8,7 +8,11 @@
 #ifndef __VECTOR_DS__
 #define __VECTOR_DS__
 
+/* standard imports */
+#include <string>
 #include <vector>
+
+/* custom imports */
 #include "logger.h"
 
 template<typename stl_type>
@@ -22,7 +26,7 @@ static inline void remove(stl_type &stl, int position) {
 }
 
 class VectorDS {
-public:
+ public:
     void insert_row(int row, int col);
     void delete_row(int row);
     void insert_col(int row, int col, int value);
@@ -39,7 +43,7 @@ public:
     void print_meta();
     void printDS();
 
-private:
+ private:
     std::vector<int> m_container;
     std::vector<int> m_meta_data;
 };

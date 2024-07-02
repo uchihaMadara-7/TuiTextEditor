@@ -8,7 +8,11 @@
 #ifndef __EDITOR_H__
 #define __EDITOR_H__
 
+/* standard imports */
 #include <fstream>
+#include <string>
+
+/* custom imports */
 #include "curses_tui.h"
 
 #ifdef DOUBLY_LIST_DS
@@ -50,7 +54,7 @@ enum class EditorMode {
 };
 
 class Editor {
-public:
+ public:
     Editor();
     ~Editor();
 
@@ -98,10 +102,10 @@ public:
 
     void _log_ds();
 
-private:
+ private:
     void set_init(bool);
 
-private:
+ private:
     CursesWindow m_window, m_banner_win, m_command_win, m_line_win;
     DATA_STRUCTURE m_ds_db;
     EditorMode m_mode;
@@ -112,4 +116,4 @@ private:
     bool m_saved_once = false;
 };
 
-#endif // __EDITOR_H__
+#endif /* __EDITOR_H__ */
