@@ -7,6 +7,7 @@
 
 /* custom imports */
 #include "include/vector_ds.h"
+#include "include/logger.h"
 
 void VectorDS::insert_row(int row, int col) {
     int remaining = m_meta_data[row] - col;

@@ -218,6 +218,9 @@ void Editor::enter_key() {
     m_window.move(row + 1, 0);
 }
 
+/* TODO: Efficeint re-renders, only render from current position till last
+    last character in the buffer
+*/
 void Editor::re_render() {
     m_window.clear();
     int total_rows = m_ds_db.get_total_rows();
@@ -293,6 +296,38 @@ void Editor::invalid_command() {
     _print_command_banner(INVALID_COMMAND);
     wstandend(m_command_win.get_window());
     reset_cursor();
+}
+
+void Editor::update_buf_row(int delta_row) {
+    int tmp_buf_row = static_cast<int>(m_buf_row) + delta_row;
+    int total_rows = m_ds_db.get_total_rows();
+    if (tmp_buf_row > total_rows) {
+        m_buf_row = total_rows-1;
+    } else if (tmp_buf_row < 0) {
+        m_buf_row = 0;
+    } else {
+        m_buf_row = tmp_buf_row;
+    }
+}
+
+void Editor::update_buf_col(int delta_col) {
+    int tmp_buf_col = static_cast<int>(m_buf_col) + delta_col;
+    int row_size = m_ds_db.get_row_size(m_buf_row);
+    if (tmp_buf_col > row_size) {
+        m_buf_col = tmp_buf_col;
+        update_buf_row(1);
+        m_buf_col %= m_ds_db.get_row_size(m_buf_row);
+    } else if (tmp_buf_col < 0) {
+        if (m_buf_row == 0) {
+            m_buf_col = 0;
+            return;
+        }
+        update_buf_row(-1);
+        m_buf_col = tmp_buf_col + m_ds_db.get_row_size(m_buf_row);
+        m_buf_col %= m_ds_db.get_row_size(m_buf_row);
+    } else {
+        m_buf_col = tmp_buf_col;
+    }
 }
 
 void Editor::_log_ds() {

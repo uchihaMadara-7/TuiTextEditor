@@ -58,8 +58,9 @@ class Logger {
     static auto convert(const T& arg) {
         if constexpr(std::is_same_v<T, std::string>) {
             return arg.c_str();
+        } else {
+            return arg;
         }
-        return arg;
     }
 
     template<typename... Args>

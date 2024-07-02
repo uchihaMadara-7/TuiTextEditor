@@ -11,6 +11,7 @@
 /* standard imports */
 #include <fstream>
 #include <string>
+#include <vector>
 
 /* custom imports */
 #include "curses_tui.h"
@@ -99,6 +100,8 @@ class Editor {
     void _print_command_banner(std::string);
     void command_mode_banner();
     void invalid_command();
+    void update_buf_col(int delta_col);
+    void update_buf_row(int delta_row);
 
     void _log_ds();
 
@@ -114,6 +117,10 @@ class Editor {
     bool m_initialised = false;
     bool m_newfile = false;
     bool m_saved_once = false;
+    /* Mapping between screen and buffer */
+    size_t m_buf_row = 0;
+    size_t m_buf_col = 0;
+    std::vector<std::vector<size_t>> buf_to_screen;
 };
 
 #endif /* __EDITOR_H__ */
