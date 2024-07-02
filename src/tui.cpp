@@ -1,6 +1,14 @@
-#include "editor.h"
-#include "logger.h"
-#include "utility.h"
+/*
+ * Copyright (c) 2024, Shubham Rana
+ * All rights reserved.
+ * This source code is licensed under the MIT-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/* custom imports */
+#include "include/editor.h"
+#include "include/logger.h"
+#include "include/utility.h"
 
 #define LOG_FILE "editor.log"
 
@@ -10,7 +18,7 @@ bool read_command(Editor &editor) {
     bool command_mode_quit = false;
     int c;
     while (!command_mode_quit && (c = editor.read())) {
-        switch(c) {
+        switch (c) {
             case KEY_ESC:
                 editor.set_mode(EditorMode::NORMAL_MODE);
                 editor.command_mode_banner();
@@ -18,19 +26,19 @@ bool read_command(Editor &editor) {
                 break;
             case KEY_ENTER:
                 DEBUG_TRACE("Command: %s", command);
-                switch((int) get_command_code(command)) {
-                    case (int) CommandType::INSERT:
+                switch (static_cast<int>(get_command_code(command))) {
+                    case static_cast<int>(CommandType::INSERT):
                         editor.set_mode(EditorMode::INSERT_MODE);
                         editor.command_mode_banner();
                         break;
-                    case (int) CommandType::WRITE:
+                    case static_cast<int>(CommandType::WRITE):
                         editor.set_mode(EditorMode::NORMAL_MODE);
                         editor.save_file();
                         break;
-                    case (int) CommandType::WRITE_CLOSE:
+                    case static_cast<int>(CommandType::WRITE_CLOSE):
                         editor.save_file();
                         /* Intentionally break skipped, to fall back to quit */
-                    case (int) CommandType::QUIT:
+                    case static_cast<int>(CommandType::QUIT):
                         if (editor.get_remove_required()) editor.remove_file();
                         return true;
                     default:
@@ -53,7 +61,6 @@ void usage(int argc, char* prog) {
 }
 
 int main(int argc, char *argv[]) {
-
     if (argc > 2) {
         usage(argc, argv[0]);
         return 1;
@@ -84,7 +91,7 @@ int main(int argc, char *argv[]) {
     int c;
 
     while (!app_quit && (c = editor.read())) {
-        switch(c) {
+        switch (c) {
             case KEY_LEFT:
                 editor.left_arrow();
                 break;
@@ -111,17 +118,19 @@ int main(int argc, char *argv[]) {
                 break;
             case KEY_INSERT_1:
             case KEY_INSERT_2:
-                if (editor.get_mode() ==EditorMode:: NORMAL_MODE) {
+                if (editor.get_mode() == EditorMode::NORMAL_MODE) {
                     editor.set_mode(EditorMode::INSERT_MODE);
                     editor.command_mode_banner();
+                } else {
+                    editor.write(c);
                 }
-                else editor.write(c);
                 break;
             case KEY_COMMAND:
-                if (editor.get_mode() ==EditorMode:: NORMAL_MODE) {
+                if (editor.get_mode() == EditorMode::NORMAL_MODE) {
                     app_quit = read_command(editor);
+                } else {
+                    editor.write(c);
                 }
-                else editor.write(c);
                 break;
             default:
                 editor.write(c);

@@ -1,7 +1,17 @@
-#include "editor.h"
-#include "logger.h"
+/*
+ * Copyright (c) 2024, Shubham Rana
+ * All rights reserved.
+ * This source code is licensed under the MIT-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/* standard imports */
 #include <cstdio>
 #include <filesystem>
+
+/* custom imports */
+#include "include/editor.h"
+#include "include/logger.h"
 
 Editor::Editor() {
     init();
@@ -67,9 +77,9 @@ bool  Editor::set_file(std::string filename) {
     }
 
     /* Re-opening in write mode: out|in doesn't destroy the existing content */
-    if (std::filesystem::exists(filename))
+    if (std::filesystem::exists(filename)) {
         m_file_handler.open(m_filename, std::ios::out | std::ios::in);
-    else {
+    } else {
         m_file_handler.open(m_filename, std::ios::out);
         m_newfile = true;
     }
@@ -92,7 +102,7 @@ void Editor::save_file() {
     DEBUG_TRACE("Saving file!");
     m_file_handler.seekp(std::ios::beg);
     int total_rows = m_ds_db.get_total_rows();
-    for (int row=0; row<total_rows; ++row) {
+    for (int row=0; row < total_rows; ++row) {
         std::string row_str = m_ds_db.get_row(row);
         m_file_handler << row_str << std::endl;
     }
@@ -105,9 +115,13 @@ void Editor::remove_file() {
 }
 
 void Editor::set_mode(EditorMode mode)  {
-    if (mode == EditorMode::INSERT_MODE) DEBUG_TRACE("Insert mode activated!");
-    else if (mode == EditorMode::NORMAL_MODE) DEBUG_TRACE("Normal mode activated!");
-    else DEBUG_TRACE("Command mode activated!");
+    if (mode == EditorMode::INSERT_MODE) {
+        DEBUG_TRACE("Insert mode activated!");
+    } else if (mode == EditorMode::NORMAL_MODE) {
+        DEBUG_TRACE("Normal mode activated!");
+    } else {
+        DEBUG_TRACE("Command mode activated!");
+    }
     m_mode = mode;
 }
 
@@ -129,8 +143,9 @@ void Editor::left_arrow() {
             int length = m_ds_db.get_row_size(row - 1);
             m_window.move(row - 1, length);
         }
+    } else {
+        m_window.movex(col-1);
     }
-    else m_window.movex(col-1);
 }
 
 void Editor::right_arrow() {
@@ -143,8 +158,9 @@ void Editor::right_arrow() {
         if ((row + 1) < m_ds_db.get_total_rows()) {
             m_window.move(row+1, 0);
         }
+    } else {
+        m_window.movex(col+1);
     }
-    else m_window.movex(col+1);
 }
 
 void Editor::down_arrow() {
@@ -183,8 +199,7 @@ void Editor::backspace() {
             re_render();
             m_window.move(row-1, length);
         }
-    }
-    else {
+    } else {
         m_ds_db.delete_col(row, col - 1);
 
         re_render();
@@ -206,7 +221,7 @@ void Editor::enter_key() {
 void Editor::re_render() {
     m_window.clear();
     int total_rows = m_ds_db.get_total_rows();
-    for (int row=0; row<total_rows; ++row) {
+    for (int row=0; row < total_rows; ++row) {
         std::string row_str = m_ds_db.get_row(row);
         m_window.print(row, 0, row_str);
     }
@@ -222,7 +237,7 @@ void Editor::set_line_placeholder() {
     init_pair(LINE_COLOR, COLOR_YELLOW, -1);
     ::wattron(m_line_win.get_window(), COLOR_PAIR(LINE_COLOR));
     int total_lines = m_line_win.get_height();
-    for (int i=0; i<total_lines; ++i) {
+    for (int i=0; i < total_lines; ++i) {
         m_line_win.print('~');
     }
 }
@@ -262,9 +277,13 @@ void Editor::_print_command_banner(std::string msg) {
 }
 
 void Editor::command_mode_banner() {
-    if (get_mode() == EditorMode::COMMAND_MODE) _print_command_banner(COMMAND_MODE_STR);
-    else if (get_mode() == EditorMode::NORMAL_MODE) _print_command_banner(NORMAL_MODE_STR);
-    else _print_command_banner(INSERT_MODE_STR);
+    if (get_mode() == EditorMode::COMMAND_MODE) {
+        _print_command_banner(COMMAND_MODE_STR);
+    } else if (get_mode() == EditorMode::NORMAL_MODE) {
+        _print_command_banner(NORMAL_MODE_STR);
+    } else {
+        _print_command_banner(INSERT_MODE_STR);
+    }
     reset_cursor();
 }
 

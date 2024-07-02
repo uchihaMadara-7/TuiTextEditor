@@ -1,4 +1,12 @@
-#include "utility.h"
+/*
+ * Copyright (c) 2024, Shubham Rana
+ * All rights reserved.
+ * This source code is licensed under the MIT-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/* custom imports */
+#include "include/utility.h"
 
 std::map<std::string, CommandType> command_codes = {
     std::make_pair("i", CommandType::INSERT),
