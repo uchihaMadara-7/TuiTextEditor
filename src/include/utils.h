@@ -30,6 +30,10 @@ CommandType get_command_code(std::string);
 std::vector<std::string> split(std::string, std::string);
 std::vector<std::string> split(std::string, char);
 
+/* returns the basename from a path like string */
 std::string basename(std::string);
+
+void setup_signal_handlers();
+void handle_signal(int);
 
 #endif /* __UTILITY__ */

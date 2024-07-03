@@ -5,8 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+/* standard imports */
+#include <csignal>
+
 /* custom imports */
-#include "include/utility.h"
+#include "include/utils.h"
+#include "include/logger.h"
 
 std::map<std::string, CommandType> command_codes = {
     std::make_pair("i", CommandType::INSERT),
@@ -53,4 +57,15 @@ std::vector<std::string> split(std::string text, char delimiter) {
 
 std::string basename(std::string text) {
     return split(text, '/').back();
+}
+
+void setup_signal_handlers() {
+    std::signal(SIGSEGV, handle_signal);
+    std::signal(SIGINT, handle_signal);
+}
+
+void handle_signal(int signal) {
+    Logger::getInstance().flush_logs();
+    std::signal(signal, SIG_DFL);
+    std::raise(signal);
 }

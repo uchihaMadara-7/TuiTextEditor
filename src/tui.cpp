@@ -8,7 +8,7 @@
 /* custom imports */
 #include "include/editor.h"
 #include "include/logger.h"
-#include "include/utility.h"
+#include "include/utils.h"
 
 #define LOG_FILE "editor.log"
 
@@ -86,6 +86,9 @@ int main(int argc, char *argv[]) {
         printf("Failed to open file!");
         return 1;
     }
+
+    /* setup signal handlers */
+    setup_signal_handlers();
 
     bool app_quit = false;
     int c;

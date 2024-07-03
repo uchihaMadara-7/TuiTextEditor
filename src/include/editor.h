@@ -12,6 +12,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <utility>
 
 /* custom imports */
 #include "curses_tui.h"
@@ -120,7 +121,7 @@ class Editor {
     /* Mapping between screen and buffer */
     size_t m_buf_row = 0;
     size_t m_buf_col = 0;
-    std::vector<std::vector<size_t>> buf_to_screen;
+    std::vector<std::vector<std::pair<size_t, size_t>>> buf_to_screen;
 };
 
 #endif /* __EDITOR_H__ */

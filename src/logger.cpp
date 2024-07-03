@@ -7,11 +7,13 @@
 
 /* custom imports */
 #include "include/logger.h"
+#include <cstdio>
 
 Logger::Logger() : m_level(LOG_INFO), m_verbose(false),
                    m_initialized(true), m_log_file(nullptr) {}
 
 Logger::Logger(std::string log_file) : Logger() {
+    m_logfile_name = log_file;
     if (log_file == NO_LOG_FILE) {
         m_verbose = true;
         return;
@@ -27,13 +29,18 @@ Logger::Logger(std::string log_file) : Logger() {
 }
 
 Logger::~Logger() {
-    if (m_log_file) {
-        fclose(m_log_file);
-    }
+    if (!m_log_file) return;
+    flush_logs();
+    fclose(m_log_file);
 }
 
 bool Logger::is_initialized() {
     return m_initialized;
+}
+
+std::string Logger::get_logfile() {
+    if (m_logfile_name == NO_LOG_FILE) return std::string();
+    return m_logfile_name;
 }
 
 void Logger::set_level(LogLevel level) {
@@ -42,6 +49,11 @@ void Logger::set_level(LogLevel level) {
 
 void Logger::set_verbosity(bool verbosity) {
     m_verbose = verbosity;
+}
+
+void Logger::flush_logs() {
+    if (!m_log_file) return;
+    fflush(m_log_file);
 }
 
 std::string Logger::_get_level_str(LogLevel c_level) {

@@ -24,7 +24,7 @@ LOG_FILE = editor.log
 SOURCE_DIR = src
 
 VECTOR_DS_SRC = $(SOURCE_DIR)/tui.cpp
-VECTOR_DS_SRC += $(SOURCE_DIR)/utility.cpp
+VECTOR_DS_SRC += $(SOURCE_DIR)/utils.cpp
 VECTOR_DS_SRC += $(SOURCE_DIR)/curses_tui.cpp
 VECTOR_DS_SRC += $(SOURCE_DIR)/editor.cpp
 VECTOR_DS_SRC += $(SOURCE_DIR)/vector_ds.cpp

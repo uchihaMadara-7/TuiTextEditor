@@ -46,6 +46,7 @@ class Logger {
 
     bool is_initialized();
 
+    std::string get_logfile();
     void set_level(LogLevel level);
     void set_verbosity(bool verbosity);
 
@@ -53,6 +54,8 @@ class Logger {
     void error(std::string msg);
     void info(std::string msg);
     void debug(std::string msg);
+
+    void flush_logs();
 
     template<typename T>
     static auto convert(const T& arg) {
@@ -99,6 +102,7 @@ class Logger {
     bool m_verbose;
     bool m_initialized;
     FILE* m_log_file;
+    std::string m_logfile_name;
 };
 
 #endif /* __LOGGER__ */

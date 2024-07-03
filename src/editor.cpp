@@ -8,6 +8,7 @@
 /* standard imports */
 #include <cstdio>
 #include <filesystem>
+#include <utility>
 
 /* custom imports */
 #include "include/editor.h"
@@ -46,6 +47,10 @@ void Editor::init() {
     m_line_win.create_window(LINES - EDITOR_END_ROW_OFFSET, 1,
         EDITOR_START_ROW, 0);
     set_line_placeholder();
+
+    /* set initial mapping between buffer and screen */
+    buf_to_screen = {{}};
+    buf_to_screen[0].emplace_back(std::make_pair(0, 0));
 
     m_window.move(0, 0);
     set_mode(EditorMode::NORMAL_MODE);
@@ -216,6 +221,9 @@ void Editor::enter_key() {
     /* Re-render everything after this enter position */
     re_render();
     m_window.move(row + 1, 0);
+    /* update the buffer co-ordinates */
+    update_buf_col(-m_ds_db.get_row_size(m_buf_row));
+    update_buf_row(1);
 }
 
 /* TODO: Efficeint re-renders, only render from current position till last
@@ -223,10 +231,28 @@ void Editor::enter_key() {
 */
 void Editor::re_render() {
     m_window.clear();
-    int total_rows = m_ds_db.get_total_rows();
-    for (int row=0; row < total_rows; ++row) {
+    size_t width = m_window.get_width();
+    size_t total_rows = m_ds_db.get_total_rows();
+    size_t screen_row = 0;
+    for (size_t row=0; row < total_rows; ++row) {
         std::string row_str = m_ds_db.get_row(row);
-        m_window.print(row, 0, row_str);
+        /* update window with row_str */
+        m_window.print(screen_row, 0, row_str);
+        /* update the buf_to_screen matrix  */
+        size_t row_size = row_str.size();
+        for (size_t col=0; col < row_size; ++col) {
+            if (row >= buf_to_screen.size()) {
+                buf_to_screen.emplace_back(std::vector<std::pair<size_t, size_t>>());
+            }
+            if (col >= buf_to_screen[row].size()) {
+                buf_to_screen[row].emplace_back(std::make_pair(-1, -1));
+            }
+            /* add mapping from buffer to screen */
+            buf_to_screen[row][col] = std::make_pair(
+                screen_row+col/width, col%width);
+        }
+        /* move screen co-ordinate to next position  */
+        screen_row += std::ceil(row_size*1.0/width);
     }
 }
 
@@ -254,10 +280,12 @@ void Editor::write(int c) {
     CHECK_NOT_INSERT_MODE
     int row = m_window.get_cursor_y();
     int col = m_window.get_cursor_x();
-    m_ds_db.insert_col(row, col, c);
+    m_ds_db.insert_col(m_buf_row, m_buf_col, c);
     re_render();
     /* ncurses auto move to next line when line end is reached */
     m_window.move(row, col + 1);
+    /* update the buffer co-ordinates */
+    update_buf_col(1);
 }
 
 void Editor::enter_command_mode() {
@@ -331,5 +359,14 @@ void Editor::update_buf_col(int delta_col) {
 }
 
 void Editor::_log_ds() {
+    int row = 0, col = 0;
+    for (auto &vec : buf_to_screen) {
+        for (auto x : vec) {
+            DEBUG_TRACE("(%d, %d) -> (%d, %d)", row, col, x.first, x.second);
+            ++col;
+        }
+        col = 0;
+        ++row;
+    }
     m_ds_db.printDS();
 }
