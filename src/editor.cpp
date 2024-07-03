@@ -144,32 +144,18 @@ void Editor::left_arrow() {
 }
 
 void Editor::right_arrow() {
-    if (m_buf_row == m_ds_db.get_total_rows()-1 &&
-        m_buf_col == m_ds_db.get_row_size(m_buf_row)) return;
     update_buf_col(1);
     reset_cursor();
 }
 
 void Editor::down_arrow() {
-    int row = m_window.get_cursor_y();
-    int col = m_window.get_cursor_x();
-
-    /* Can only move if it is not the last row */
-    if (row < (m_ds_db.get_total_rows() - 1)) {
-        int length = m_ds_db.get_row_size(row + 1);
-        m_window.move(row+1, std::min(col, length));
-    }
+    update_buf_row(1);
+    reset_cursor();
 }
 
 void Editor::up_arrow() {
-    int row = m_window.get_cursor_y();
-    int col = m_window.get_cursor_x();
-
-    /* Can only move if it is not the first row */
-    if (row > 0) {
-        int length = m_ds_db.get_row_size(row - 1);
-        m_window.move(row-1, std::min(col, length));
-    }
+    update_buf_row(-1);
+    reset_cursor();
 }
 
 void Editor::backspace() {
@@ -315,12 +301,16 @@ void Editor::set_buf_row(int row) {
 void Editor::update_buf_row(int delta_row) {
     int tmp_buf_row = static_cast<int>(m_buf_row) + delta_row;
     int total_rows = m_ds_db.get_total_rows();
-    if (tmp_buf_row > total_rows) {
+    if (tmp_buf_row >= total_rows) {
         set_buf_row(total_rows-1);
     } else if (tmp_buf_row < 0) {
         set_buf_row(0);
     } else {
         set_buf_row(tmp_buf_row);
+        size_t row_size = m_ds_db.get_row_size(m_buf_row);
+        if (row_size < m_buf_col) {
+            set_buf_col(row_size);
+        }
     }
 }
 
@@ -328,6 +318,7 @@ void Editor::update_buf_col(int delta_col) {
     int tmp_buf_col = static_cast<int>(m_buf_col) + delta_col;
     int row_size = m_ds_db.get_row_size(m_buf_row);
     if (tmp_buf_col > row_size) {
+        if (m_buf_row == static_cast<size_t>(m_ds_db.get_total_rows()) - 1) return;
         set_buf_col(tmp_buf_col % (row_size+1));
         update_buf_row(1);
     } else if (tmp_buf_col < 0) {
