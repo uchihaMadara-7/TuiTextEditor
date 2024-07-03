@@ -101,6 +101,10 @@ class Editor {
     void _print_command_banner(std::string);
     void command_mode_banner();
     void invalid_command();
+
+    /* buffer to screen mapping  */
+    void set_buf_col(int col);
+    void set_buf_row(int row);
     void update_buf_col(int delta_col);
     void update_buf_row(int delta_row);
 

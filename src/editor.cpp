@@ -27,8 +27,8 @@ Editor::~Editor() {
 
 void Editor::init() {
     /* Main text editor window */
-    m_window.create_window(LINES - EDITOR_END_ROW_OFFSET,
-        COLS - EDITOR_END_COL_OFFSET,
+    m_window.create_window(LINES - EDITOR_END_ROW_OFFSET - EDITOR_START_ROW,
+        COLS - EDITOR_END_COL_OFFSET - EDITOR_START_COL,
         EDITOR_START_ROW, EDITOR_START_COL);
     m_window.cbreak();
     m_window.set_echo(false);
@@ -139,18 +139,7 @@ bool Editor::get_remove_required() {
 }
 
 void Editor::left_arrow() {
-    int row = m_window.get_cursor_y();
-    int col = m_window.get_cursor_x();
-    /* If starting of line is reached, resetting to end of previous line */
-    if (col == 0) {
-        /* Cannot move past the first line */
-        if (row > 0) {
-            int length = m_ds_db.get_row_size(row - 1);
-            m_window.move(row - 1, length);
-        }
-    } else {
-        m_window.movex(col-1);
-    }
+
 }
 
 void Editor::right_arrow() {
@@ -192,38 +181,40 @@ void Editor::up_arrow() {
 
 void Editor::backspace() {
     CHECK_NOT_INSERT_MODE
-    int row = m_window.get_cursor_y();
-    int col = m_window.get_cursor_x();
-
-    /* If starting of line is reached, resetting to end of previous line */
-    if (col == 0) {
-        if (row > 0) {
-            int length = m_ds_db.get_row_size(row - 1);
-            m_ds_db.delete_row(row);
-
-            re_render();
-            m_window.move(row-1, length);
-        }
-    } else {
-        m_ds_db.delete_col(row, col - 1);
-
-        re_render();
-        m_window.move(row, col-1);
+    /* no more characters to delete */
+    if (m_buf_col == 0 && m_buf_row == 0) {
+        return;
     }
+
+    /* at the beginning of line */
+    if (m_buf_col == 0) {
+        m_ds_db.delete_row(m_buf_row);
+        re_render();
+        /* update the buffer and screen co-ordinates */
+        update_buf_row(-1);
+        set_buf_col(m_ds_db.get_row_size(m_buf_row));
+        reset_cursor();
+        return;
+    }
+
+    /* either middle or end of line */
+    m_ds_db.delete_col(m_buf_row, m_buf_col-1);
+    re_render();
+    /* update the buffer and screen co-ordinates */
+    update_buf_col(-1);
+    reset_cursor();
 }
 
 void Editor::enter_key() {
     CHECK_NOT_INSERT_MODE
-    int row = m_window.get_cursor_y();
-    int col = m_window.get_cursor_x();
-    m_ds_db.insert_row(row, col);
+    m_ds_db.insert_row(m_buf_row, m_buf_col);
 
     /* Re-render everything after this enter position */
     re_render();
-    m_window.move(row + 1, 0);
-    /* update the buffer co-ordinates */
-    update_buf_col(-m_ds_db.get_row_size(m_buf_row));
+    /* update the buffer and screen co-ordinates */
+    set_buf_col(0);
     update_buf_row(1);
+    reset_cursor();
 }
 
 /* TODO: Efficeint re-renders, only render from current position till last
@@ -240,7 +231,9 @@ void Editor::re_render() {
         m_window.print(screen_row, 0, row_str);
         /* update the buf_to_screen matrix  */
         size_t row_size = row_str.size();
-        for (size_t col=0; col < row_size; ++col) {
+
+        /* if there are character(s) on row */
+        for (size_t col=0; col <= row_size; ++col) {
             if (row >= buf_to_screen.size()) {
                 buf_to_screen.emplace_back(std::vector<std::pair<size_t, size_t>>());
             }
@@ -257,8 +250,9 @@ void Editor::re_render() {
 }
 
 void Editor::reset_cursor() {
-    /* TODO: last known position instead of 0, 0 */
-    m_window.move(0, 0);
+    /* TODO: last known position */
+    auto &x = buf_to_screen[m_buf_row][m_buf_col];
+    m_window.move(x.first, x.second);
 }
 
 void Editor::set_line_placeholder() {
@@ -278,14 +272,11 @@ int Editor::read() {
 
 void Editor::write(int c) {
     CHECK_NOT_INSERT_MODE
-    int row = m_window.get_cursor_y();
-    int col = m_window.get_cursor_x();
     m_ds_db.insert_col(m_buf_row, m_buf_col, c);
     re_render();
-    /* ncurses auto move to next line when line end is reached */
-    m_window.move(row, col + 1);
     /* update the buffer co-ordinates */
     update_buf_col(1);
+    reset_cursor();
 }
 
 void Editor::enter_command_mode() {
@@ -326,15 +317,23 @@ void Editor::invalid_command() {
     reset_cursor();
 }
 
+void Editor::set_buf_col(int col) {
+    m_buf_col = col;
+}
+
+void Editor::set_buf_row(int row) {
+    m_buf_row = row;
+}
+
 void Editor::update_buf_row(int delta_row) {
     int tmp_buf_row = static_cast<int>(m_buf_row) + delta_row;
     int total_rows = m_ds_db.get_total_rows();
     if (tmp_buf_row > total_rows) {
-        m_buf_row = total_rows-1;
+        set_buf_row(total_rows-1);
     } else if (tmp_buf_row < 0) {
-        m_buf_row = 0;
+        set_buf_row(0);
     } else {
-        m_buf_row = tmp_buf_row;
+        set_buf_row(tmp_buf_row);
     }
 }
 
@@ -342,19 +341,19 @@ void Editor::update_buf_col(int delta_col) {
     int tmp_buf_col = static_cast<int>(m_buf_col) + delta_col;
     int row_size = m_ds_db.get_row_size(m_buf_row);
     if (tmp_buf_col > row_size) {
-        m_buf_col = tmp_buf_col;
+        set_buf_col(tmp_buf_col);
         update_buf_row(1);
-        m_buf_col %= m_ds_db.get_row_size(m_buf_row);
+        set_buf_col(m_buf_col % m_ds_db.get_row_size(m_buf_row));
     } else if (tmp_buf_col < 0) {
         if (m_buf_row == 0) {
-            m_buf_col = 0;
+            set_buf_col(0);
             return;
         }
         update_buf_row(-1);
-        m_buf_col = tmp_buf_col + m_ds_db.get_row_size(m_buf_row);
-        m_buf_col %= m_ds_db.get_row_size(m_buf_row);
+        set_buf_col(tmp_buf_col + m_ds_db.get_row_size(m_buf_row));
+        set_buf_col(m_buf_col % m_ds_db.get_row_size(m_buf_row));
     } else {
-        m_buf_col = tmp_buf_col;
+        set_buf_col(tmp_buf_col);
     }
 }
 

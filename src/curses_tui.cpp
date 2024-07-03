@@ -7,6 +7,7 @@
 
 /* custom imports */
 #include "include/curses_tui.h"
+#include "include/logger.h"
 
 /* Initialize the static member */
 bool CursesWindow::m_initialized = false;
