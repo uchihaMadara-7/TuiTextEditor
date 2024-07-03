@@ -139,22 +139,15 @@ bool Editor::get_remove_required() {
 }
 
 void Editor::left_arrow() {
-
+    update_buf_col(-1);
+    reset_cursor();
 }
 
 void Editor::right_arrow() {
-    int row = m_window.get_cursor_y();
-    int col = m_window.get_cursor_x();
-    int length = m_ds_db.get_row_size(row);
-    /* If end of line is reached, resetting to beginning of next line */
-    if (col == length) {
-        /* Cannot move past the last line */
-        if ((row + 1) < m_ds_db.get_total_rows()) {
-            m_window.move(row+1, 0);
-        }
-    } else {
-        m_window.movex(col+1);
-    }
+    if (m_buf_row == m_ds_db.get_total_rows()-1 &&
+        m_buf_col == m_ds_db.get_row_size(m_buf_row)) return;
+    update_buf_col(1);
+    reset_cursor();
 }
 
 void Editor::down_arrow() {
@@ -186,19 +179,13 @@ void Editor::backspace() {
         return;
     }
 
-    /* at the beginning of line */
     if (m_buf_col == 0) {
+        /* at the beginning of line */
         m_ds_db.delete_row(m_buf_row);
-        re_render();
-        /* update the buffer and screen co-ordinates */
-        update_buf_row(-1);
-        set_buf_col(m_ds_db.get_row_size(m_buf_row));
-        reset_cursor();
-        return;
+    } else {
+        /* either middle or end of line */
+        m_ds_db.delete_col(m_buf_row, m_buf_col-1);
     }
-
-    /* either middle or end of line */
-    m_ds_db.delete_col(m_buf_row, m_buf_col-1);
     re_render();
     /* update the buffer and screen co-ordinates */
     update_buf_col(-1);
@@ -341,17 +328,16 @@ void Editor::update_buf_col(int delta_col) {
     int tmp_buf_col = static_cast<int>(m_buf_col) + delta_col;
     int row_size = m_ds_db.get_row_size(m_buf_row);
     if (tmp_buf_col > row_size) {
-        set_buf_col(tmp_buf_col);
+        set_buf_col(tmp_buf_col % (row_size+1));
         update_buf_row(1);
-        set_buf_col(m_buf_col % m_ds_db.get_row_size(m_buf_row));
     } else if (tmp_buf_col < 0) {
         if (m_buf_row == 0) {
             set_buf_col(0);
             return;
         }
         update_buf_row(-1);
-        set_buf_col(tmp_buf_col + m_ds_db.get_row_size(m_buf_row));
-        set_buf_col(m_buf_col % m_ds_db.get_row_size(m_buf_row));
+        set_buf_col(tmp_buf_col + m_ds_db.get_row_size(m_buf_row) + 1);
+        set_buf_col(m_buf_col % (m_ds_db.get_row_size(m_buf_row) + 1));
     } else {
         set_buf_col(tmp_buf_col);
     }
