@@ -5,7 +5,7 @@ Text-based User Interface (TUI) Editor (like vim, nano) in C++
 ```Shell
 ~$ make
 mkdir -p build_vec
-g++ -std=c++20 -Wno-macro-redefined -Wall -Wextra -Iinclude -DLINUX -c src/text_editor.cpp -o build_vec/text_editor.o
+g++ -std=c++20 -Wno-macro-redefined -Wall -Wextra -Iinclude -DLINUX -c src/text_editor.cpp -o build_vec/tui.o
 g++ -std=c++20 -Wno-macro-redefined -Wall -Wextra -Iinclude -DLINUX -c src/curses_tui.cpp -o build_vec/curses_tui.o
 g++ -std=c++20 -Wno-macro-redefined -Wall -Wextra -Iinclude -DLINUX -c src/editor.cpp -o build_vec/editor.o
 g++ -std=c++20 -Wno-macro-redefined -Wall -Wextra -Iinclude -DLINUX -c src/vector_ds.cpp -o build_vec/vector_ds.o
@@ -21,8 +21,8 @@ build_vec
 ├── curses_tui.o
 ├── editor.o
 ├── logger.o
-├── text_editor
-├── text_editor.o
+├── tui
+├── tui.o
 └── vector_ds.o
 
 1 directory, 6 files
