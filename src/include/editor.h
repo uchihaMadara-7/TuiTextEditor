@@ -43,6 +43,8 @@
 #define SAVE_FILE_STR "---- FILE SAVED ----"
 #define NO_FILE_STR "---- NO FILE OPENED ----"
 #define INVALID_COMMAND "---- INVALID COMMAND ----"
+#define WRITE_FAILED "---- FILE WRITE FAILED ----"
+#define EXISTING_FILE "-- CANNOT OVERRIDE EXISTING FILE --"
 
 #define LOG_DS Editor::getInstance()._log_ds
 
@@ -79,6 +81,7 @@ class Editor {
     void init();
     bool is_initialized();
 
+    bool set_new_file(std::string filename);
     bool set_file(std::string filename);
     Error save_file();
     void set_mode(EditorMode mode);

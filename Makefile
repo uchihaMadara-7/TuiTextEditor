@@ -8,8 +8,7 @@ CXXFLAGS = -std=c++20
 WARNINGS = -Wno-macro-redefined
 WARNINGS += -Wall
 WARNINGS += -Wextra
-WARNINGS += -Wunused-parameter
-# WARNINGS += -Wno-unused-command-line-argument
+
 CXXFLAGS += $(WARNINGS)
 
 INCLUDES = -Iinclude
@@ -29,6 +28,7 @@ SRC += $(SOURCE_DIR)/utils.cpp
 SRC += $(SOURCE_DIR)/curses_tui.cpp
 SRC += $(SOURCE_DIR)/editor.cpp
 SRC += $(SOURCE_DIR)/logger.cpp
+SRC += $(SOURCE_DIR)/commands.cpp
 
 VECTOR_DS_SRC = $(SRC)
 VECTOR_DS_SRC += $(SOURCE_DIR)/vector_ds.cpp

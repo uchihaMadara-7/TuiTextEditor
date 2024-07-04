@@ -6,6 +6,7 @@
  */
 
 /* custom imports */
+#include "include/commands.h"
 #include "include/editor.h"
 #include "include/logger.h"
 #include "include/utils.h"
@@ -32,11 +33,11 @@ bool read_command(Editor &editor) {
                         editor.command_mode_banner();
                         break;
                     case static_cast<int>(CommandType::WRITE):
+                        csave(editor);
                         editor.set_mode(EditorMode::NORMAL_MODE);
-                        editor.save_file();
                         break;
                     case static_cast<int>(CommandType::WRITE_CLOSE):
-                        editor.save_file();
+                        csave(editor);
                         /* Intentionally break skipped, to fall back to quit */
                     case static_cast<int>(CommandType::QUIT):
                         if (editor.get_remove_required()) editor.remove_file();

@@ -85,6 +85,7 @@ bool  Editor::set_file(std::string filename) {
     if (std::filesystem::exists(filename)) {
         m_file_handler.open(m_filename, std::ios::out | std::ios::in);
     } else {
+        /* file was give to tui as input, so can open as newfile */
         m_file_handler.open(m_filename, std::ios::out);
         m_newfile = true;
     }
@@ -96,11 +97,25 @@ bool  Editor::set_file(std::string filename) {
     return true;
 }
 
+bool Editor::set_new_file(std::string filename) {
+    /* file creation after opening tui,
+     * cannot override exisiting file on the system
+     */
+    if (std::filesystem::exists(filename)) {
+        _print_command_banner(EXISTING_FILE);
+        return false;
+    }
+    m_filename = filename;
+    m_file_handler.open(m_filename);
+    m_newfile = true;
+    if (!m_file_handler.is_open()) return false;
+    return true;
+}
+
 Error Editor::save_file() {
     if (!m_file_handler.is_open()) {
         DEBUG_TRACE("No file was opened!");
-        _print_command_banner(NO_FILE_STR);
-        reset_cursor();
+        _print_command_banner("filename: ");
         return Error::NO_FILE;
     }
 
@@ -113,6 +128,7 @@ Error Editor::save_file() {
     }
     m_saved_once = true;
     _print_command_banner(SAVE_FILE_STR);
+    reset_cursor();
     return Error::NO_ERROR;
 }
 
