@@ -19,9 +19,12 @@
 #define DEBUG_STR "[DEBUG]: "
 #define NEW_LINE '\n'
 
+#ifdef DEBUG_FLAG /* if debug flag is provided in compilation */
+
 #define ERROR_TRACE Logger::getInstance().error
 #define INFO_TRACE Logger::getInstance().info
 #define DEBUG_TRACE Logger::getInstance().debug
+#define FLUSH_LOGS Logger::getInstance().flush_logs()
 
 enum LogLevel {
     LOG_ERROR,
@@ -104,5 +107,18 @@ class Logger {
     FILE* m_log_file;
     std::string m_logfile_name;
 };
+
+#else
+/* when debug flag is not given - for faster builds and program */
+template<typename... Args>
+void nothing([[maybe_unused]] std::string format,
+    [[maybe_unused]] Args&&... args) {}
+
+#define ERROR_TRACE nothing
+#define INFO_TRACE nothing
+#define DEBUG_TRACE nothing
+#define FLUSH_LOGS
+
+#endif /* end of the debug flag check */
 
 #endif /* __LOGGER__ */

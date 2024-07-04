@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Setting up logger */
+    #ifdef DEBUG_FLAG
     Logger &logger = Logger::getInstance(LOG_FILE);
     if (!logger.is_initialized()) {
         /* Early return due to init failure */
@@ -74,6 +75,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     logger.set_level(LOG_DEBUG);
+    #endif
 
     Editor& editor = Editor::getInstance();
     if (!editor.is_initialized()) {

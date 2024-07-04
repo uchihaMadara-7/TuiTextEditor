@@ -16,19 +16,20 @@
 
 /* custom imports */
 #include "curses_tui.h"
+#include "vector_ds.h"
+
+#define DATA_STRUCTURE VectorDS
 
 #ifdef DOUBLY_LIST_DS
     #include "doubly_list.h"
     #define DATA_STRUCTURE DoublyList2D
+#endif /* DOUBLY_LIST_DS */
 
-/* SOME_OTHER_DS is placehold for some other DS */
-#elif defined(SOME_OTHER_DS)
-
-#else
+/* #if defined(SOME_OTHER_DS) */
+#ifdef VECTOR_DS
     #include "vector_ds.h"
     #define DATA_STRUCTURE VectorDS
-
-#endif /* DOUBLY_LIST_DS and other directive checks */
+#endif /* VECTOR_DS */
 
 #define SPACE ' '
 #define EDITOR_START_ROW 1
@@ -48,6 +49,11 @@
 #define CHECK_NOT_INSERT_MODE if (m_mode != EditorMode::INSERT_MODE) return;
 
 extern std::string editor_filename;
+
+enum class Error {
+    NO_FILE,
+    NO_ERROR,
+};
 
 enum class EditorMode {
     INSERT_MODE,
@@ -74,7 +80,7 @@ class Editor {
     bool is_initialized();
 
     bool set_file(std::string filename);
-    void save_file();
+    Error save_file();
     void set_mode(EditorMode mode);
     EditorMode get_mode();
     void remove_file();

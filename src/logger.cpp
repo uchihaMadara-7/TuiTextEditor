@@ -5,6 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+/* Only generate the code if DEBUG_FLAG in compilation */
+#ifdef DEBUG_FLAG
+
 /* custom imports */
 #include "include/logger.h"
 #include <cstdio>
@@ -77,3 +80,5 @@ void Logger::info(std::string msg) {
 void Logger::debug(std::string msg) {
     _trace(LOG_DEBUG, "%s", msg);
 }
+
+#endif /* end of debug check */

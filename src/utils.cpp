@@ -65,7 +65,7 @@ void setup_signal_handlers() {
 }
 
 void handle_signal(int signal) {
-    Logger::getInstance().flush_logs();
+    FLUSH_LOGS;
     std::signal(signal, SIG_DFL);
     std::raise(signal);
 }

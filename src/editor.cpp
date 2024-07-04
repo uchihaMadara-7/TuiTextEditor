@@ -96,12 +96,12 @@ bool  Editor::set_file(std::string filename) {
     return true;
 }
 
-void Editor::save_file() {
+Error Editor::save_file() {
     if (!m_file_handler.is_open()) {
         DEBUG_TRACE("No file was opened!");
         _print_command_banner(NO_FILE_STR);
         reset_cursor();
-        return;
+        return Error::NO_FILE;
     }
 
     DEBUG_TRACE("Saving file!");
@@ -113,6 +113,7 @@ void Editor::save_file() {
     }
     m_saved_once = true;
     _print_command_banner(SAVE_FILE_STR);
+    return Error::NO_ERROR;
 }
 
 void Editor::remove_file() {
@@ -218,12 +219,12 @@ void Editor::re_render() {
                 screen_row+col/width, col%width);
         }
         /* move screen co-ordinate to next position  */
-        screen_row += std::ceil(row_size*1.0/width);
+        // screen_row += std::ceil(row_size*1.0/width);
+        screen_row += row_size/width + 1;
     }
 }
 
 void Editor::reset_cursor() {
-    /* TODO: last known position */
     auto &x = buf_to_screen[m_buf_row][m_buf_col];
     m_window.move(x.first, x.second);
 }
