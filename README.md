@@ -30,7 +30,9 @@ build_vector
 ├── logger.o
 ├── tui
 ├── tui.o
-└── vector_ds.o
+├── vector_ds.o
+└── commands.o
+
 
 1 directory, 6 files
 ```
@@ -53,3 +55,17 @@ In case of vector DS, it is `build_vector/tui`
 ```
 
 # Usage/Interface Details
+## modes
+```
+command mode (:)
+normal mode (Esc)
+insert mode (a or i)
+```
+## valid commands in command mode
+<pre>
+w    (description: for saving file)
+     (<b>Note:</b> addtionaly asks for filename if no file is linked to buffer)
+q    (description: quit tui)
+wq   (description: save and quit tui)
+     (<b>Note:</b> addtionaly asks for filename if no file is linked to buffer)
+</pre>
