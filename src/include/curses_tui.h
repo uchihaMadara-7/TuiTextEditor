@@ -38,6 +38,8 @@
 
 #define LINE_COLOR 1
 #define INVALID_COLOR 2
+#define INSERT_MODE_COLOR 3
+#define NORMAL_MODE_COLOR 4
 
 class CursesWindow {
  public:

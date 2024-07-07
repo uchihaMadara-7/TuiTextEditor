@@ -12,6 +12,7 @@
 
 /* custom imports */
 #include "include/editor.h"
+#include "include/curses_tui.h"
 #include "include/logger.h"
 
 Editor::Editor() {
@@ -136,7 +137,7 @@ void Editor::remove_file() {
     std::remove(m_filename.c_str());
 }
 
-void Editor::set_mode(EditorMode mode)  {
+void Editor::set_mode(EditorMode mode, bool banner) {
     if (mode == EditorMode::INSERT_MODE) {
         DEBUG_TRACE("Insert mode activated!");
     } else if (mode == EditorMode::NORMAL_MODE) {
@@ -145,6 +146,7 @@ void Editor::set_mode(EditorMode mode)  {
         DEBUG_TRACE("Command mode activated!");
     }
     m_mode = mode;
+    if (banner) command_mode_banner();
 }
 
 EditorMode Editor::get_mode() {
@@ -290,18 +292,25 @@ void Editor::_print_command_banner(std::string msg) {
 
 void Editor::command_mode_banner() {
     if (get_mode() == EditorMode::COMMAND_MODE) {
-        _print_command_banner(COMMAND_MODE_STR);
+        /* TODO: check if something needs to be done in command mode */
     } else if (get_mode() == EditorMode::NORMAL_MODE) {
+        init_pair(NORMAL_MODE_COLOR, COLOR_BLUE, -1);
+        ::wattron(m_command_win.get_window(), A_BOLD | A_STANDOUT |
+                  COLOR_PAIR(NORMAL_MODE_COLOR));
         _print_command_banner(NORMAL_MODE_STR);
     } else {
+        init_pair(INSERT_MODE_COLOR, COLOR_YELLOW, -1);
+        ::wattron(m_command_win.get_window(), A_BOLD | A_STANDOUT |
+                  COLOR_PAIR(INSERT_MODE_COLOR));
         _print_command_banner(INSERT_MODE_STR);
     }
+    wstandend(m_command_win.get_window());
     reset_cursor();
 }
 
 void Editor::invalid_command() {
-    init_pair(INVALID_COLOR, COLOR_WHITE, COLOR_RED);
-    ::wattron(m_command_win.get_window(), COLOR_PAIR(INVALID_COLOR));
+    init_pair(INVALID_COLOR, COLOR_RED, -1);
+    ::wattron(m_command_win.get_window(), COLOR_PAIR(INVALID_COLOR)|A_STANDOUT);
     _print_command_banner(INVALID_COMMAND);
     wstandend(m_command_win.get_window());
     reset_cursor();

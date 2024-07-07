@@ -17,8 +17,12 @@ CXXFLAGS += $(INCLUDES)
 LDFLAGS = -lncurses
 
 MACROS = -DLINUX
+ifeq ($(DEBUG),1)
+	MACROS += -DDEBUG_FLAG
+endif
 
 VECTOR_DS_BUILD = build-vector
+VECTOR_OBJ_BUILD = $(VECTOR_DS_BUILD)/objs
 LOG_FILE = editor.log
 
 SOURCE_DIR = src
@@ -35,7 +39,7 @@ VECTOR_DS_SRC += $(SOURCE_DIR)/vector_ds.cpp
 
 VECTOR_DS_TARGET = $(VECTOR_DS_BUILD)/tui
 
-VOBJS = $(patsubst $(SOURCE_DIR)/%.cpp, $(VECTOR_DS_BUILD)/%.o, $(VECTOR_DS_SRC))
+VOBJS = $(patsubst $(SOURCE_DIR)/%.cpp, $(VECTOR_OBJ_BUILD)/%.o, $(VECTOR_DS_SRC))
 
 all: vector
 
@@ -43,13 +47,11 @@ all: vector
 vector: $(VECTOR_DS_BUILD) $(VECTOR_DS_TARGET)
 
 $(VECTOR_DS_BUILD):
+	$(eval MACROS += -DVECTOR_DS)
 	mkdir -p $(VECTOR_DS_BUILD)
+	mkdir -p $(VECTOR_OBJ_BUILD)
 
-$(VECTOR_DS_BUILD)/%.o: $(SOURCE_DIR)/%.cpp
-	$(eval MACROS = -DLINUX -DVECTOR_DS)
-ifeq ($(DEBUG),1)
-	$(eval MACROS = -DLINUX -DVECTOR_DS -DDEBUG_FLAG)
-endif
+$(VECTOR_OBJ_BUILD)/%.o: $(SOURCE_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(MACROS) -c $< -o $@
 
 $(VECTOR_DS_TARGET): $(VOBJS)

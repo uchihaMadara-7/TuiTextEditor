@@ -84,7 +84,7 @@ class Editor {
     bool set_new_file(std::string filename);
     bool set_file(std::string filename);
     Error save_file();
-    void set_mode(EditorMode mode);
+    void set_mode(EditorMode mode, bool banner = true);
     EditorMode get_mode();
     void remove_file();
     bool get_remove_required();

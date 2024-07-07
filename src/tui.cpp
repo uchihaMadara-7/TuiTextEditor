@@ -22,7 +22,6 @@ bool read_command(Editor &editor) {
         switch (c) {
             case KEY_ESC:
                 editor.set_mode(EditorMode::NORMAL_MODE);
-                editor.command_mode_banner();
                 command_mode_quit = true;
                 break;
             case KEY_ENTER:
@@ -30,11 +29,10 @@ bool read_command(Editor &editor) {
                 switch (static_cast<int>(get_command_code(command))) {
                     case static_cast<int>(CommandType::INSERT):
                         editor.set_mode(EditorMode::INSERT_MODE);
-                        editor.command_mode_banner();
                         break;
                     case static_cast<int>(CommandType::WRITE):
                         csave(editor);
-                        editor.set_mode(EditorMode::NORMAL_MODE);
+                        editor.set_mode(EditorMode::NORMAL_MODE, false);
                         break;
                     case static_cast<int>(CommandType::WRITE_CLOSE):
                         csave(editor);
@@ -43,7 +41,7 @@ bool read_command(Editor &editor) {
                         if (editor.get_remove_required()) editor.remove_file();
                         return true;
                     default:
-                        editor.set_mode(EditorMode::NORMAL_MODE);
+                        editor.set_mode(EditorMode::NORMAL_MODE, false);
                         editor.invalid_command();
                 }
                 command_mode_quit = true;
@@ -96,6 +94,7 @@ int main(int argc, char *argv[]) {
     bool app_quit = false;
     int c;
 
+    editor.set_mode(EditorMode::NORMAL_MODE);
     while (!app_quit && (c = editor.read())) {
         switch (c) {
             case KEY_LEFT:
@@ -119,14 +118,12 @@ int main(int argc, char *argv[]) {
             case KEY_ESC:
                 if (editor.get_mode() == EditorMode::INSERT_MODE) {
                     editor.set_mode(EditorMode::NORMAL_MODE);
-                    editor.command_mode_banner();
                 }
                 break;
             case KEY_INSERT_1:
             case KEY_INSERT_2:
                 if (editor.get_mode() == EditorMode::NORMAL_MODE) {
                     editor.set_mode(EditorMode::INSERT_MODE);
-                    editor.command_mode_banner();
                 } else {
                     editor.write(c);
                 }
