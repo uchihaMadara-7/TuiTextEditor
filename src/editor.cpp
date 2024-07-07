@@ -328,7 +328,7 @@ void Editor::update_buf_row(int delta_row) {
     int tmp_buf_row = static_cast<int>(m_buf_row) + delta_row;
     int total_rows = m_ds_db.get_total_rows();
     if (tmp_buf_row >= total_rows) {
-        set_buf_row(total_rows-1);
+        set_buf_row(std::max(total_rows-1, 0));
     } else if (tmp_buf_row < 0) {
         set_buf_row(0);
     } else {
